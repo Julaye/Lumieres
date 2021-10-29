@@ -1,8 +1,8 @@
 # Batiment_v01
 
-FR: Gestion d'un bâtiment ou d'un ensemble d'éclairage avec un Arduino Nano (échelle 1HO 1/87 ou supérieure)
+FR: Gestion d'un bâtiment ou d'un ensemble d'éclairage avec un Arduino Nano (échelle HO 1/87 ou supérieure)
 
-EN : Management of a building or a set of lighting with an Arduino Nano (scale 1HO 1/87 or higher)
+EN : Management of a building or a set of lighting with an Arduino Nano (scale HO 1/87 or higher)
 
 ## Resumé
 
