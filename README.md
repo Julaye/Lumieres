@@ -23,8 +23,9 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 ## Notes de version
 
 ### v20211030
-- ajout du mode gyrophare (fichier simugryo.h)
+- ajout du mode gyrophare (fichier simugyro.h)
 - reprise de la FSM eclairage pour une plus grande généricité, l'ajout d'autres types d'éclairage est simplifié
+- mise à jour de la documentation sur google docs
 
 ### v20211029.3
 - Probleme avec le germe (seed) qui n'était pas très aléatoire
