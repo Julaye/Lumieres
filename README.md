@@ -14,13 +14,17 @@ Langage de programmation : C for Arduino Nano
 
 Langue du projet : Français / French
 
-Version pre-release : v20211029.3
+Version pre-release : v20211030
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
 Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la-lumiere-jaillisse/20889/
 
 ## Notes de version
+
+### v20211030
+- ajout du mode gyrophare (fichier simugryo.h)
+- reprise de la FSM eclairage pour une plus grande généricité, l'ajout d'autres types d'éclairage est simplifié
 
 ### v20211029.3
 - Probleme avec le germe (seed) qui n'était pas très aléatoire
