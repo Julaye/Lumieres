@@ -6,6 +6,10 @@ EN : Management of a building or a set of lighting with an Arduino Nano (scale H
 
 ## Resumé
 
+Objectif du projet : Le programme Batiment_v01 est une tentative pour proposer aux adeptes du modélisme un automate de gestion des éclairages d’un bâtiment, ou plus généralement d’un ensemble d’éclairages, qui soit facile d’accès pour un non initié à la programmation d’un Arduino, et fortement paramétrable pour couvrir les besoins les plus courants.
+
+Licence : GPL v3
+
 Langage de programmation : C for Arduino Nano
 
 Langue du projet : Français / French
