@@ -47,15 +47,17 @@ struct {
 // tester les éclairages du batiment
 // ---------------------------------------------------------------------
 
-/* Séquence 1 : un simple chenillard sur les sorties D3, D4 et D7 , c'est bien ! */
+/* Séquence 1 : un simple chenillard sur les sorties D3, D4 et D5 , c'est bien ! */
 long int seqDebug1[] = {
    0,      0,  MARK, /* place une MARK pour le LOOP */
+   512,    0,  PERM, /* Allume D11 le gyrophare */
    2,      10, SET,  /* Allume D3 (éclairage standard) pendant 10 secondes */
    4,      10, SET,  /* Eteint D3 et Allume D4 (néon neuf) pendant 10 secondes */
-   32,     10, SET,  /* Eteint D4 et Allume D7 (néon ancien) pendant 10 secondes */
+   8 ,     10, SET,  /* Eteint D4 et Allume D5 (néon ancien) pendant 10 secondes */
    0,       5, WAIT, /* pause pendant 5 secondes, ne touche pas au lumières allumées */
-   0,      10, SET,  /* Eteint D7 et attends 10 secondes */
-   2+4+32, 10, SET,  /* Allume D3, D4 et D7 pendant 10 secondes */
+   0,      10, SET,  /* Eteint D5 et attends 10 secondes */
+   2+4+8 , 10, SET,  /* Allume D3, D4 et D5 pendant 10 secondes */
+   512,     0, UNSET,/* Arrete le gyrophare */
    0,      0,  LOOP  /* Tout est éteint. Boucle sur le début MARK */
 };
 

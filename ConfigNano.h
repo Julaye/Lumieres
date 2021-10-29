@@ -7,12 +7,22 @@
 // Les éléments qui suivent sont spécifiques à l'Arduino Nano et ne
 // doivent être modifié que pour supporter une carte différente
 
+// l'intensité maximum de chaque sortie PWM 
+const int PWM_FOR_LED = 16;
+
 // mode des sorties : PWM ou IO 
 // -> attention l'intensité n'est pas réglable en IO, protéger avec une 
 //    résistance en fonction de la led utilisée
 
 const int MODE_PWM = 0;
 const int MODE_IO = 1;
+
+// ON ou OFF ou autre valeur (fading)
+const int LIGHT_ON = PWM_FOR_LED;
+const int LIGHT_FAD2 = PWM_FOR_LED/2;
+const int LIGHT_FAD4 = PWM_FOR_LED/4;
+const int LIGHT_FAD8 = PWM_FOR_LED/8;
+const int LIGHT_OFF = 0;
 
 // Configuration du mode de chaque sortie (Arduino Nano)
 

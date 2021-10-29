@@ -7,6 +7,7 @@
 //  v20211029 - utilisation de la BUILTIN led pour indiquer le bon fonctionnement du séquenceur / automate, nettoyage des traces verbose
 //  v20211029.2 - Fixe un problème sur la commande ALEA suite à des tests intensifs
 //  v20211029.3 - La germe du générateur n'était pas vraiment aléatoire ... (pratique pour les tests, moins pour l'authenticité)
+//  v20211030 - ajout du mode gyrophare + reprise de la FSM eclairage (plus grande généricité)
 //
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
 //  utilisez le calculateur de résistance svp  https://www.digikey.fr/fr/resources/conversion-calculators/conversion-calculator-led-series-resistor
@@ -33,8 +34,9 @@
 // Ce fichier concerne la machine à état fini pour gérer un éclairage
 #include "FSMeclairage.h"
 
-// Ce fichier permet de simuler un néon
+// Ces fichiers permettent de simuler un néon, un gyrophare, ...
 #include "SimuNeon.h"
+#include "SimuGyrophare.h"
 
 // Ce fichier concerne la machine à état fini pour gérer le batiment
 #include "FSMbatiment.h"
@@ -57,7 +59,7 @@ void initFSM()
   int seq;
 
   // Initialise l'automate de chaque sortie
-  for (int i = 0 ; i < maxLights; i++) gEStateRunning[i] = estate_OFF;
+  for (int i = 0 ; i < maxLights; i++) gLight[i].stateRunning = estate_OFF;
 
   // récupère la séquence pour le mode RUNNING
   seq = digitalRead(seqPin);
@@ -134,9 +136,7 @@ void printCmd(long int leds,bool timing=false)
   if (timing) {
     long int t = millis();
     Serial.print("t");
-    Serial.print(t/1000);
-    Serial.print(".");
-    Serial.print((t/10) % 100);
+    Serial.print((float)t/1000.0,2);
   }
   Serial.print(" [ ");
   for (int i=0; i<maxLights; i++) {
@@ -209,13 +209,13 @@ void set(int led, int value)
 // eteint les lumières
 void lightOff(int led)
 {
-  if ((debug>1) && (gEStateRunning[led] != estate_OFF)) Serial.println("estate_OFF");
+  if ((debug>1) && (gLight[led].stateRunning != estate_OFF)) Serial.println("estate_OFF");
   
   // eteint la led
   unset(led);
 
   // passe en mode démarrage (au cas où)
-  gEStateRunning[led] = estate_OFF;
+  gLight[led].stateRunning = estate_OFF;
 }
 
 // démarre l'allumage des lumières
@@ -224,17 +224,43 @@ void lightStartPowerUp(int led)
   if (debug>1) Serial.println("state_STPWRUP");
 
   // si la led est déjà allumée, ne rien faire
-  if (gEStateRunning[led] == estate_ON) return;
+  if (gLight[led].stateRunning == estate_ON) return;
+
+  switch (ledCnf[led]) {
+    case ETYPE_STANDARD: 
+        gLight[led].stateRunning = estate_ON;
+        if (debug>1) Serial.println(") STANDARD -> state_ON");
+        return;
+
+    case ETYPE_NEONNEUF:
+    case ETYPE_NEONVIEUX:
+        gLight[led].pblink = (blink*)&blinkNeon;
+        gLight[led].maxblink = sizeof(blinkNeon)/sizeof(blink);
+        gLight[led].nextState = estate_ON;
+        break;
+
+    case ETYPE_GYROPHARE:
+        gLight[led].pblink = (blink*)&blinkGyrophare;
+        gLight[led].maxblink = sizeof(blinkGyrophare)/sizeof(blink);
+        gLight[led].nextState = estate_PWRUP;
+        break;
+
+    case ETYPE_NOTUSED:
+    default:
+        gLight[led].stateRunning = estate_OFF;
+        if (debug>1) Serial.println(") NOTUSED or UNKNOWN -> state_OFF");
+        return;    
+  }
 
   // passe en mode démarrage
-  gEStateRunning[led] = estate_PWRUP;
+  gLight[led].stateRunning = estate_PWRUP;
   if (debug>1) Serial.print("stateRunning(");
   if (debug>1) Serial.print(led);
   if (debug>1) Serial.println(")<-- PWRUP");
 
   // prépare la séquence
-  gEStatePwrup[led] = 0;
-  gEStateDelay[led] = 0;
+  gLight[led].statePwrup = 0;
+  gLight[led].stateDelay = 0;
 }
 
 // allume les lumières
@@ -253,9 +279,9 @@ void lightOn(int led)
           Serial.print("Glitch led:");
           Serial.println(led);
         }
-        gEStateRunning[led] = estate_PWRUP;
-        gEStatePwrup[led] = INDEX_GLITCHPWRUP;
-        gEStateDelay[led] = 0;
+        gLight[led].stateRunning = estate_PWRUP;
+        gLight[led].statePwrup = INDEX_GLITCHPWRUP;
+        gLight[led].stateDelay = 0;
       }
     }
 }
@@ -267,42 +293,34 @@ void lightPowerUp(int led)
       Serial.print("state_PWRUP(led:");
       Serial.print(led);
       Serial.print(",delay:");
-      Serial.print(gEStateDelay[led]);
+      Serial.print(gLight[led].stateDelay);
     }
 
-    // un eclairage standard : il suffit de l'allumer en le passant à l'état ON
-    if (ledCnf[led]==ETYPE_STANDARD) {
-         gEStateRunning[led] = estate_ON;
-         if (debug>1) Serial.println(") STANDARD -> state_ON");
-         return; 
-    } 
-
     // vérifier si le delai de la transition est écoulé
-    if (gEStateDelay[led]<=0) 
+    if (gLight[led].stateDelay<=0) 
     { 
         if (debug>1) {
           Serial.print(") - Blink sequence:");
-          Serial.print(gEStatePwrup[led]);
+          Serial.print(gLight[led].statePwrup);
           Serial.print(" intensity: ");
         }
         
-        if (debug>1) Serial.print(blinkOn[gEStatePwrup[led]].intensity);
+        if (debug>1) Serial.print(gLight[led].pblink[gLight[led].statePwrup].intensity);
 
-        gEStateDelay[led] = blinkOn[gEStatePwrup[led]].duration;
+        gLight[led].stateDelay = gLight[led].pblink[gLight[led].statePwrup].duration;
         if (debug>1) Serial.print(" duration: ");
-        if (debug) Serial.println(gEStateDelay[led]);
+        if (debug) Serial.println(gLight[led].stateDelay);
 
-        set(led,blinkOn[gEStatePwrup[led]].intensity);
+        set(led,gLight[led].pblink[gLight[led].statePwrup].intensity);
         
-        gEStatePwrup[led] += 1;
-        if (gEStatePwrup[led]>=maxStateBlink) { 
-          gEStatePwrup[led] = 0;
-          gEStateRunning[led] = estate_ON;
-          if (debug>1) Serial.println("state_ON");
+        gLight[led].statePwrup += 1;
+        if (gLight[led].statePwrup>=gLight[led].maxblink) { 
+          gLight[led].statePwrup = 0;
+          gLight[led].stateRunning = gLight[led].nextState;
         }
   }
   if (debug>1) Serial.print(".");
-  gEStateDelay[led] = gEStateDelay[led] - 1;
+  gLight[led].stateDelay--;
 }
 
 // ---------------------------------------------------------------------
@@ -329,7 +347,7 @@ void fsmEclairage()
 {
   for (int led=0; led<maxLights; led++) {
 
-    switch (gEStateRunning[led]) {
+    switch (gLight[led].stateRunning) {
       
       case estate_OFF : lightOff(led); break;
 

@@ -5,20 +5,7 @@
 // faut envoyer à une led pour simuler un néon
 //
 
-// l'intensité maximum de chaque sortie PWM 
-const int PWM_FOR_LED = 12;
-
-// ON ou OFF ou autre valeur (fading)
-const int LIGHT_ON = PWM_FOR_LED;
-const int LIGHT_FAD2 = PWM_FOR_LED/2;
-const int LIGHT_FAD4 = PWM_FOR_LED/4;
-const int LIGHT_OFF = 0;
-
-// blink transition pour un néon
-const struct blink {
-  int duration;
-  int intensity;
-} blinkOn[] = {
+const blink blinkNeon[] = {
     10, LIGHT_ON,   20, LIGHT_OFF,
     20, LIGHT_ON,  240, LIGHT_OFF,
     20, LIGHT_ON,   40, LIGHT_OFF,
@@ -38,5 +25,5 @@ const struct blink {
     60, LIGHT_ON,   20, LIGHT_OFF
 }; 
 
-// nombre de transitions
-const int maxStateBlink = sizeof(blinkOn)/sizeof(blink);
+// numéro de la transition pour reprendre l'enchainement sur un glitch de néon
+const int INDEX_GLITCHPWRUP = 22;

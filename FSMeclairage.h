@@ -8,6 +8,7 @@
 const int ETYPE_STANDARD  = 0;
 const int ETYPE_NEONNEUF  = 1;
 const int ETYPE_NEONVIEUX = 2;
+const int ETYPE_GYROPHARE = 3;
 const int ETYPE_NOTUSED  = 99;
 
 // state of the FSM : "stateRunning"
@@ -21,14 +22,21 @@ const int estate_PWRUP     = 2; /* éclairage en allumage --> ON quand la séque
 
 const int estate_ON        = 3; /* éclairage allumé */
 
-// Pour chaque éclairage, il faut garder son état (OFF, STPWRUP, PWRUP ou ON)
-int gEStateRunning[maxLights];
+// blink transition pour un éclairage
+typedef struct blink {
+  int duration;
+  int intensity;
+} blink;
 
-// Pour chaque éclairage dans l'état PWRUP, mémoriser la transition en cours
-int gEStatePwrup[maxLights];
+// parametres d'un éclairage
+typedef struct {
+    int stateRunning; /* état (OFF, STPWRUP, PWRUP ou ON) */
+    int statePwrup;   /* dans l'état PWRUP, mémoriser la transition en cours */
+    int stateDelay;   /* delay avant la prochaine transition ON OFF */
+    blink*  pblink;   /* pointeur sur la table des transitions */
+    int maxblink;     /* taille de la table des transitions */
+    int nextState;    /* état une fois que la table des transitions a été parcourue */
+} paramLight;
 
-// delay avant la prochaine transition ON OFF
-int gEStateDelay[maxLights];
-
-// numéro de la transition pour reprendre l'enchainement sur un glitch de néon
-const int INDEX_GLITCHPWRUP = 22;
+// Pour chaque éclairage
+paramLight gLight[maxLights];
