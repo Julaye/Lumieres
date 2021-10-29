@@ -6,6 +6,7 @@
 //  v20211028 - mise au point, ajout de commandes (WAIT, WSTOP, UNSET), nettoyage du code, mode debug / verbose
 //  v20211029 - utilisation de la BUILTIN led pour indiquer le bon fonctionnement du séquenceur / automate, nettoyage des traces verbose
 //  v20211029.2 - Fixe un problème sur la commande ALEA suite à des tests intensifs
+//  v20211029.3 - La germe du générateur n'était pas vraiment aléatoire ... (pratique pour les tests, moins pour l'authenticité)
 //
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
 //  utilisez le calculateur de résistance svp  https://www.digikey.fr/fr/resources/conversion-calculators/conversion-calculator-led-series-resistor
@@ -107,13 +108,14 @@ void setup() {
   pinMode(startPin,INPUT_PULLUP);
 
   // la germe du générateur aléatoire
-  randomSeed(analogRead(0));
+  randomSeed(analogRead(7));
 
   // Annonce la version
-  Serial.println("Batiment v01 20211029 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Batiment v01 20211029.3 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
-  Serial.print("HW RESET -> INIT ");
+  Serial.print("HW RESET -> INIT seed:");
+  Serial.println(random());
   initFSM();
  }
 
@@ -384,7 +386,7 @@ void runningFSM()
 {
   long int  leds;
   long int  duration;
-  int commande;
+  long int commande;
   long int  r;
 
   long int  ledsoff;
