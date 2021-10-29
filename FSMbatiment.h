@@ -38,7 +38,6 @@ bool gCurrentStateStartPin;
 // parametres de l'automate
 struct {
     long int duration;     /* durée avant la transition */
-    long int prevDuration; /* durée précédente */
     long int leds;         /* leds concernés par la transition */
     int command;           /* commande associée */
 } gSeq;

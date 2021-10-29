@@ -5,6 +5,7 @@
 //  v20211027 - première implémentation, mise au point, mode debug
 //  v20211028 - mise au point, ajout de commandes (WAIT, WSTOP, UNSET), nettoyage du code, mode debug / verbose
 //  v20211029 - utilisation de la BUILTIN led pour indiquer le bon fonctionnement du séquenceur / automate, nettoyage des traces verbose
+//  v20211029.2 - Fixe un problème sur la commande ALEA suite à des tests intensifs
 //
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
 //  utilisez le calculateur de résistance svp  https://www.digikey.fr/fr/resources/conversion-calculators/conversion-calculator-led-series-resistor
@@ -41,7 +42,7 @@
 const int debug = 0;
 
 // mettre à 1 pour rendre l'exécution de l'automate verbeux
-const int verbose = 0;
+const int verbose = 1;
 
 // la configuration de votre batiment
 #include "ConfigBatiment.h"
@@ -78,7 +79,6 @@ void initFSM()
   gCurrentStateStartPin = false;
 
   gSeq.duration = millis();
-  gSeq.prevDuration = 0;
   gSeq.leds = 0;
   gSeq.command = SET;
 }
@@ -392,7 +392,7 @@ void runningFSM()
   // vérifie si le compteur de rappel est écoulé
   if (gSeq.duration<millis()) {
     // il est écoulé
-    Serial.print("RUN CLEAR ");
+    Serial.print("NEXT ");
     
     // préserve les leds qu'il faudra peut être éteindre
     ledsoff = gSeq.leds;
@@ -432,25 +432,22 @@ void runningFSM()
           r = random(1,duration)*60;
           gSeq.duration = millis() + r*1000;
           
-          Serial.print("STANDBY cmd:");
+          Serial.print("STANDBY duration:");
+          Serial.print(r);
+          Serial.print(" s cmd:");
           printCmd(leds);
-          Serial.print(" duration:");
-          Serial.println(r);
-          
-          gSeq.prevDuration = gSeq.duration;
-          gSeq.leds = leds;
+
+          // prévoir les extinction en même temps que le standby en cours
+          gSeq.leds = leds | ledsoff;
           
           PowerUpLeds(leds);
-          PowerDownLeds(ledsoff&~leds);
          break; 
 
       case PERM: 
-          /* permanent : jusqu'à l'arrêt de l'Arduino ou le changement de séquence */
+          /* permanent : jusqu'à l'arrêt de l'Arduino ou le changement de séquence ou UNSET */
           Serial.print("PERM cmd:");
           printCmd(leds);
-          
-          gSeq.prevDuration = 0; /* permanent */
-          
+                    
           PowerUpLeds(leds);   
           PowerDownLeds(ledsoff&~leds);
           break;
@@ -458,22 +455,20 @@ void runningFSM()
       case ALEA:
           /* aléatoirement : permet de rendre aléatoire la présence d'une personne dans un bureau la nuit, aligné sur la commande STANDBY suivante ou PERM précédente */
           if (random(0,duration)==0) {
-            Serial.print("ALEA duration:");
-            Serial.print(gSeq.prevDuration);
-            Serial.print(" cmd:");
+            Serial.print("ALEA cmd:");
             printCmd(leds);
             
             PowerUpLeds(leds);
-            if (gSeq.prevDuration!=0) {
-              // si standby, alors prévoir la future extinction en même temps que le standby en cours */
-              gSeq.leds |= leds;
-            }
+            gSeq.leds = leds;
           } else {
             Serial.print("ALEA NOPE cmd: ");
             printCmd(leds);
-          }
 
-          PowerDownLeds(ledsoff&~gSeq.leds);
+         }
+          
+          // pour standby à suivre, prévoir la future extinction en même temps que le standby en cours
+          gSeq.leds |= ledsoff;
+
           break;
 
       case UNSET:
@@ -484,8 +479,7 @@ void runningFSM()
           Serial.print("s cmd: ");
           printCmd(leds);
          
-          PowerDownLeds(leds);
-          PowerDownLeds(ledsoff);
+          PowerDownLeds(leds | ledsoff);
           break;
             
       case SET:
@@ -505,6 +499,9 @@ void runningFSM()
           gSeq.duration = millis() + duration*1000;
           Serial.print("WAIT ");
           Serial.println(duration);
+          
+          // prévoir les extinction en même temps que le wait en cours
+          gSeq.leds = ledsoff;
           break;
  
       case WSTOP:
@@ -515,6 +512,9 @@ void runningFSM()
           Serial.print(duration);
           Serial.print(" pin: ");
           Serial.println(r);
+
+          // prévoir les extinction en même temps que le stop en cours
+          gSeq.leds = ledsoff;
           
           if (r) {
             gpSeq -=3; /* reste sur la commande en cours */
