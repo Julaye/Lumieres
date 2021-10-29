@@ -113,7 +113,7 @@ void setup() {
   randomSeed(analogRead(7));
 
   // Annonce la version
-  Serial.println("Batiment v01 20211029.3 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Batiment v01 20211030 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   Serial.print("HW RESET -> INIT seed:");
