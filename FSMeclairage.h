@@ -11,7 +11,10 @@ const int ETYPE_NEONVIEUX = 2;
 const int ETYPE_GYROPHARE = 3;
 const int ETYPE_FLASH     = 4;
 const int ETYPE_SOUDURE   = 5;
+const int ETYPE_FIRE      = 6;
+
 const int ETYPE_SERVO   = 128; /* experimental */
+
 const int ETYPE_NOTUSED = 255;
 
 // state of the FSM : "stateRunning"

@@ -1,16 +1,18 @@
 // Lumieres::ConfigLumieres.h
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
-// Ce fichier concerne la configuration du batiment, de la scène ou de 
-// l'ensemble d'éclairages que vous souhaitez commander.
+// Ce fichier concerne la configuration de votre scène, soit de 
+// l'ensemble des éclairages ou sorties que vous souhaitez commander.
 //
-// il contient le mapping entre sorties et type d'éclairages ainsi
-// que les deux séquences à utiliser.
+// il contient le mapping entre sorties de l'Arduino et type d'éclairages 
+// ainsi que les deux séquences executées par l'automate fini.
 //
 // Le programme est livré avec la configuration du batiment administratif
 // du dépot diesel appartenant à notre Mlle Pélerin
 //
-// Plus d'exemples dans la documention
+// Plus d'exemples dans la documention, notamment pour les fonctions les
+// avancées comme le poste de soudure, le flash du photographe, ...
+//
 
 // ---------------------------------------------------------------------
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE BATIMENT ---
@@ -26,11 +28,11 @@ const int ledCnf[] = {
             /* D8 */ ETYPE_NEONNEUF,   /* 64 : bureau M. Gaston (IO) */
             /* D9 */ ETYPE_NEONNEUF,   /* 128 : bureau secrétaire (PWM) */
             /* D10 */ ETYPE_STANDARD,  /* 256 : bureau Mlle Pélerin (PWM) */
-            /* D11 */ ETYPE_SOUDURE  /* 512 : gyrophare (PWM) */
+            /* D11 */ ETYPE_FIRE        /* 512 : gyrophare (PWM) */
 };
 
 // Séquence est une liste de couple (sorties, durée d'allumage en secondes, commande)
-// Cf le fichier FSMBatiment.h pour la signification de chaque marqueur
+// Cf le fichier FSMLumieres.h pour la signification de chaque commande utilisée
 
 /* Séquence 1 : Miss Pélerin passe (avec ou sans M. Gaston) */
 long int mySeq1[] = {
@@ -77,5 +79,5 @@ long int mySeq2[] = {
                       0,     0,  END   /* fin de la séquence */
 };
 
-// --- ICI SE TERMINE LA CONFIGURATION EN FONCTION DE VOTRE BATIMENT ---
+// --- ICI SE TERMINE LA CONFIGURATION EN FONCTION DE VOTRE SCENE    ---
 // ---------------------------------------------------------------------

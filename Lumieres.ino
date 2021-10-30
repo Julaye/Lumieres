@@ -12,6 +12,7 @@
 //  v20211030 - ajout du mode gyrophare + reprise de la FSM eclairage (plus grande généricité)
 //  v20211030.2 - Changement du nom de projet -> Lumieres
 //  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash + type Soudure
+//  v20211030.4 - Ajout du type Fire (brasero/bougie)
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -43,6 +44,7 @@
 #include "SimuNeon.h"
 #include "SimuGyrophare.h"
 #include "SimuSoudure.h"
+#include "SimuFire.h"
 
 // Ce fichier concerne la machine à état fini pour gérer le batiment, la scène, ...
 #include "FSMLumieres.h"
@@ -269,6 +271,12 @@ void lightStartPowerUp(int led)
         gLight[led].nextState = estate_STPWRUP;
         break;
        
+    case ETYPE_FIRE:
+        gLight[led].pblink = (blink*)&blinkFire;
+        gLight[led].maxblink = construitTableauFire();
+        gLight[led].nextState = estate_STPWRUP;
+        break;
+
     case ETYPE_NOTUSED:
     default:
         gLight[led].stateRunning = estate_OFF;
