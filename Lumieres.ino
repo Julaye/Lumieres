@@ -58,7 +58,7 @@ const int PWM_FOR_LED = 16;
 // ---------------------------------------------------------------------
 
 // mettre à 1 pour un debug dans la console série, 2 pour full debug
-const int debug = 0;
+const int debug = 1;
 
 // mettre à 1 pour rendre l'exécution de l'automate verbeux
 const int verbose = 1;
@@ -77,7 +77,7 @@ Servo gServo;
 
 void initFSM()
 { 
-  int seq;
+  byte seq;
 
   // Initialise l'automate de chaque sortie
   for (int i = 0 ; i < maxLights; i++) gLight[i].stateRunning = estate_OFF;
@@ -165,6 +165,7 @@ void printCmd(int leds,bool timing=false)
     Serial.print("t");
     Serial.print((float)t/1000.0,2);
   }
+
   Serial.print(" [ ");
   for (int i=0; i<maxLights; i++) {
     if (leds&pos) Serial.print("X "); else Serial.print("_ ");
@@ -188,7 +189,7 @@ void displayLeds(bool timing=false)
 // Fonctions de support pour allumer / éteindre une led
 // ---------------------------------------------------------------------
 
-void unset(int led)
+void unset(byte led)
 {
   switch (outputMode[led]) {
     case MODE_IO: digitalWrite(2+led,LOW); break;
@@ -203,7 +204,7 @@ void unset(int led)
   }
 }
 
-void set(int led, int value)
+void set(byte led, int value)
 {
   if (value==LIGHT_OFF) {
     // indicateur que la séquence est vivante !
@@ -234,7 +235,7 @@ void set(int led, int value)
 // ---------------------------------------------------------------------
 
 // eteint les lumières
-void lightOff(int led)
+void lightOff(byte led)
 {
   if ((debug>1) && (gLight[led].stateRunning != estate_OFF)) Serial.println("estate_OFF");
 
@@ -253,7 +254,7 @@ void lightOff(int led)
 
 // démarre l'allumage des lumières
 // perm est à true si l'allumage va être permanent
-void lightStartPowerUp(int led,bool perm=false)
+void lightStartPowerUp(byte led,bool perm=false)
 {
   if (debug) {
     Serial.print("state_STPWRUP led:");
@@ -308,7 +309,7 @@ void lightStartPowerUp(int led,bool perm=false)
         gLight[led].pblink = (blink*)&blinkClignotant;
         gLight[led].maxblink = sizeof(blinkClignotant)/sizeof(blink);
         gLight[led].nextState = estate_PWRUP;
-         break;
+        break;
 
     #ifdef Servo_h
     case ETYPE_SERVO:
@@ -335,9 +336,14 @@ void lightStartPowerUp(int led,bool perm=false)
 }
 
 // allume les lumières
-void lightOn(int led)
+void lightOn(byte led)
 {
     int alea;
+
+    if (debug>1) {
+      Serial.print("state_ON led:");
+      Serial.println(led);
+    }
 
     if (ledCnf[led]!=ETYPE_SERVO) {
       set(led,PWM_FOR_LED); 
@@ -360,10 +366,10 @@ void lightOn(int led)
 }
 
 // gère une séquence d'allumage
-void lightPowerUp(int led)
+void lightPowerUp(byte led)
 {
     if (debug>1) {
-      Serial.print("state_PWRUP(led:");
+      Serial.print("state_PWRUP led:");
       Serial.print(led);
       Serial.print(",delay:");
       Serial.print(gLight[led].stateDelay);
@@ -380,16 +386,17 @@ void lightPowerUp(int led)
     // vérifier si le delai de la transition est écoulé
     if (gLight[led].stateDelay<=0) 
     { 
-        if (debug>1) {
-          Serial.print(") - Blink sequence:");
+        if (debug) {
+          Serial.print(led);
+          Serial.print("- Blink sequence:");
           Serial.print(gLight[led].statePwrup);
           Serial.print(" intensity: ");
         }
         
-        if (debug>1) Serial.print(gLight[led].pblink[gLight[led].statePwrup].intensity);
+        if (debug) Serial.print(gLight[led].pblink[gLight[led].statePwrup].intensity);
 
         gLight[led].stateDelay = gLight[led].pblink[gLight[led].statePwrup].duration;
-        if (debug>1) Serial.print(" duration: ");
+        if (debug) Serial.print(" duration: ");
         if (debug) Serial.println(gLight[led].stateDelay);
 
         set(led,gLight[led].pblink[gLight[led].statePwrup].intensity);
@@ -437,6 +444,8 @@ void fsmEclairage()
       case estate_PWRUP : lightPowerUp(led); break;
     
       case estate_ON : lightOn(led); break;
+
+      default: Serial.print("Unknown stateRunning led:"); Serial.print(led); Serial.print(" stateRunning:"); Serial.println(gLight[led].stateRunning); break;
     
     } // fin du switch
     

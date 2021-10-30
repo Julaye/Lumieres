@@ -20,7 +20,7 @@
 // Affectation des types d'éclairage ou de fonctions à chaque sortie
 const int ledCnf[] = {
             /* D2 */ ETYPE_NEONNEUF,   /* 1 : bureau administratif (IO) *
-            /* D3 */ ETYPE_CLIGNOTANT, /* 2 : accueil (PWM) */
+            /* D3 */ ETYPE_NEONNEUF,   /* 2 : accueil (PWM) */
             /* D4 */ ETYPE_STANDARD,   /* 4 : bureau M. CLaude (IO) */
             /* D5 */ ETYPE_NEONNEUF,   /* 8 : couloir haut (PWM) */
             /* D6 */ ETYPE_NEONVIEUX,  /* 16 : escalier (PWM) */

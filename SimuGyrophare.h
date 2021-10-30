@@ -2,8 +2,8 @@
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
 // Ce fichier concerne la suite des allumages et extinctions qu'il 
-// faut envoyer à une led pour simuler un gyrophare ou un flash
-//
+// faut envoyer à une led pour simuler un gyrophare, un flash ou
+// un clignotant
 
 const blink blinkGyrophare[] = {
     125, LIGHT_FAD8, 
