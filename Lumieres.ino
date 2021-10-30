@@ -11,7 +11,7 @@
 //  v20211029.3 - La germe du générateur n'était pas vraiment aléatoire ... (pratique pour les tests, moins pour l'authenticité)
 //  v20211030 - ajout du mode gyrophare + reprise de la FSM eclairage (plus grande généricité)
 //  v20211030.2 - Changement du nom de projet -> Lumieres
-//  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence
+//  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -47,7 +47,7 @@
 #include "FSMLumieres.h"
 
 // mettre à 1 pour un debug dans la console série, 2 pour full debug
-const int debug = 0;
+const int debug = 1;
 
 // mettre à 1 pour rendre l'exécution de l'automate verbeux
 const int verbose = 1;
@@ -256,6 +256,12 @@ void lightStartPowerUp(int led)
         gLight[led].nextState = estate_PWRUP;
         break;
 
+    case ETYPE_FLASH:
+        gLight[led].pblink = (blink*)&blinkFlash;
+        gLight[led].maxblink = sizeof(blinkFlash)/sizeof(blink);
+        gLight[led].nextState = estate_OFF;
+        break;
+       
     case ETYPE_NOTUSED:
     default:
         gLight[led].stateRunning = estate_OFF;

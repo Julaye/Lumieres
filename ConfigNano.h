@@ -18,6 +18,7 @@ const int MODE_PWM = 0;
 const int MODE_IO = 1;
 
 // ON ou OFF ou autre valeur (fading)
+const int LIGHT_FLASH = 255;
 const int LIGHT_ON = PWM_FOR_LED;
 const int LIGHT_FAD2 = PWM_FOR_LED/2;
 const int LIGHT_FAD4 = PWM_FOR_LED/4;

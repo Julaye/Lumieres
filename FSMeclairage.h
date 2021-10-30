@@ -9,7 +9,9 @@ const int ETYPE_STANDARD  = 0;
 const int ETYPE_NEONNEUF  = 1;
 const int ETYPE_NEONVIEUX = 2;
 const int ETYPE_GYROPHARE = 3;
-const int ETYPE_NOTUSED  = 99;
+const int ETYPE_FLASH     = 4;
+const int ETYPE_SERVO   = 128; /* experimental */
+const int ETYPE_NOTUSED = 255;
 
 // state of the FSM : "stateRunning"
 // chaque éclairage a un état particulier et un graphe de transition
