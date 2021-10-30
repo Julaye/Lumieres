@@ -10,9 +10,9 @@ Objectif du projet : Le programme Lumières est une tentative pour proposer aux 
 
 L'utilisateur adapte le fichier *ConfigLumieres.h* selon ses besoins et il obtient un automate opérationnel, sans écrire une seule ligne de code, seulement des données dans le fichier susmentionné. C'est une approche NO CODE - LOW CODE pour surfer sur le buzz des outils de programmation actuels.
 
-Les types d'éclairages supportés actuellement sont : lampe standard, néon neuf, néon fatigué (glitchs), flash de photographe, poste de soudure et gyrophare. Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
+Les types d'éclairages supportés actuellement sont : lampe standard, néon neuf, néon fatigué (glitchs), flash de photographe, poste de soudure, feu (bougie/brasero) et gyrophare. Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
-En roadmap : le brasero, la lampe à pétrole, le servomoteur d'une porte ...
+En roadmap : la lampe à pétrole, le servomoteur d'une porte ...
 
 Licence : Le logiciel est sous licence GPL et peut être librement utilisé et modifié dans le cadre de notre passion de modélisme, vos éventuelles modifications doivent être reversées à la communauté.
 
@@ -35,6 +35,9 @@ La documentation proposée présente aussi dans son chapitre 9 de nombreux exemp
 Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la-lumiere-jaillisse/20889/
 
 ## Notes de version
+
+### v20211030.4
+- Ajout du type Fire pour simuler une bougie, un brasero
 
 ### v20211030.3
 - Ajout du type Poste de soudure, pour animer très simplement un atelier ...
