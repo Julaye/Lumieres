@@ -37,6 +37,8 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 ## Notes de version
 
 ### v20211030.4
+- La valeur 0 dans le paramètre duration permet la demi-seconde pour les commandes SET, WAIT et WSTOP
+- une valeur différente de 0 dans le paramètre duration de la commande UNSET introduit une attente de nombre de secondes spécifié
 - optimisation de la mémoire dynamique (chasse aux 'long int' inutiles)
 - Ajout du type Fire pour simuler une bougie, un brasero
 
