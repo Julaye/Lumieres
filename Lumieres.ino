@@ -13,6 +13,7 @@
 //  v20211030.2 - Changement du nom de projet -> Lumieres
 //  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash + type Soudure
 //  v20211030.4 - Ajout du type Fire (brasero/bougie) + optimisation de la mémoire dynamique (chasse aux 'long int' inutiles) + type Servo
+//  v20211030.5 - Ajout du type Clignotant, éclairage qui ne clignote que s'il n'est pas permanent !
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -33,6 +34,11 @@
 // La documentation est accessible ici : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
 #include <Arduino.h>
+
+// l'intensité maximum de chaque sortie PWM pour vos LEDs
+// à adapter en fonction de votre situation, entre 16 et 255 !
+// Ne pas oublier la résistance de 220 ohms pour les protéger
+const int PWM_FOR_LED = 16;
 
 // Ce fichier concerne la configuration matérielle Arduino utilisée
 #include "ConfigNano.h"
@@ -134,7 +140,7 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20211030.4 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20211030.5 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   Serial.print("HW RESET -> INIT seed:");
@@ -246,7 +252,8 @@ void lightOff(int led)
 }
 
 // démarre l'allumage des lumières
-void lightStartPowerUp(int led)
+// perm est à true si l'allumage va être permanent
+void lightStartPowerUp(int led,bool perm=false)
 {
   if (debug) {
     Serial.print("state_STPWRUP led:");
@@ -290,8 +297,18 @@ void lightStartPowerUp(int led)
     case ETYPE_FIRE:
         gLight[led].pblink = (blink*)&blinkFire;
         gLight[led].maxblink = construitTableauFire();
-        gLight[led].nextState = estate_STPWRUP;
+        gLight[led].nextState = estate_PWRUP;
         break;
+
+    case ETYPE_CLIGNOTANT:
+        if (perm) {
+          gLight[led].stateRunning = estate_ON;
+          return;
+        }
+        gLight[led].pblink = (blink*)&blinkClignotant;
+        gLight[led].maxblink = sizeof(blinkClignotant)/sizeof(blink);
+        gLight[led].nextState = estate_PWRUP;
+         break;
 
     #ifdef Servo_h
     case ETYPE_SERVO:
@@ -435,12 +452,12 @@ void fsmEclairage()
 // En utilisant le tableau de bits correspondant au mapping 
 // ---------------------------------------------------------------------
 
-void PowerUpLeds(int leds)
+void PowerUpLeds(int leds,bool perm=false)
 {
   int pos = 1;
           
   for (int led=0; led<maxLights; led++) {
-    if (leds&pos) lightStartPowerUp(led);
+    if (leds&pos) lightStartPowerUp(led,perm);
     pos = pos << 1;
   }
 }
@@ -557,7 +574,7 @@ void runningFSM()
           Serial.print("PERM cmd:");
           printCmd(io);
                     
-          PowerUpLeds(io);   
+          PowerUpLeds(io,true);   
           PowerDownLeds(ledsoff&~io);
           break;
 

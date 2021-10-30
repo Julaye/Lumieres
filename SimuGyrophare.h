@@ -26,3 +26,15 @@ const blink blinkFlash[] = {
     30 , LIGHT_FLASH, 
     10,  LIGHT_OFF,  
 }; 
+
+const blink blinkClignotant[] = {
+    100, LIGHT_OFF,
+    30,  LIGHT_FAD8,
+    40,  LIGHT_FAD4,
+    30,  LIGHT_FAD2,
+    200, LIGHT_ON,
+    30,  LIGHT_FAD2,
+    40,  LIGHT_FAD4,
+    30,  LIGHT_FAD8,
+    100,  LIGHT_OFF,
+}; 
