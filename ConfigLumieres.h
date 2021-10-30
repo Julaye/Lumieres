@@ -15,7 +15,7 @@
 // ---------------------------------------------------------------------
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE BATIMENT ---
 
-// Affectation des types d'éclairage à chaque sortie
+// Affectation des types d'éclairage ou de fonctions à chaque sortie
 const int ledCnf[] = {
             /* D2 */ ETYPE_NEONNEUF,   /* 1 : bureau administratif (IO) *
             /* D3 */ ETYPE_NEONNEUF,   /* 2 : accueil (PWM) */

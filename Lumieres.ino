@@ -11,6 +11,7 @@
 //  v20211029.3 - La germe du générateur n'était pas vraiment aléatoire ... (pratique pour les tests, moins pour l'authenticité)
 //  v20211030 - ajout du mode gyrophare + reprise de la FSM eclairage (plus grande généricité)
 //  v20211030.2 - Changement du nom de projet -> Lumieres
+//  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -415,8 +416,9 @@ void PowerDownLeds(long int leds)
 int decodeInputPin(long int io)
 {
   int pin;
-  
-  switch (io) {
+
+  // applique un filtre pour extraire le numéro de l'entrée
+  switch (io&0x7F) {
     case 0 : pin = startPin; break;
     case 1 : pin = inputUserPin1; break;
     case 2 : pin = inputUserPin2; break;
@@ -560,9 +562,14 @@ void runningFSM()
  
       case WSTOP:
           gSeq.duration = millis() + duration*1000;
+
+          // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
           pin = decodeInputPin(io);
-          r = (digitalRead(pin) == HIGH);
-          
+
+          // test la condition d'arret du STOP
+          r = (digitalRead(pin) == ((io&80)?LOW:HIGH));
+
+          // Un peu de blabla, c'est utile en mise au point de l'automatisme
           Serial.print("WSTOP ");
           Serial.print(duration);
           Serial.print(" pin: ");
@@ -572,7 +579,8 @@ void runningFSM()
 
           // prévoir les extinction en même temps que le stop en cours
           gSeq.leds = ledsoff;
-          
+
+          // il faut encore attendre
           if (r) {
             gpSeq -=3; /* reste sur la commande en cours */
           }
