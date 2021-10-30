@@ -1,4 +1,4 @@
-// Batiment01::SimuNeon.h
+// Lumieres::SimuNeon.h
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
 // Ce fichier concerne la suite des allumages et extinctions qu'il 

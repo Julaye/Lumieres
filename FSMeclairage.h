@@ -1,4 +1,4 @@
-// Batiment01::FSMeclairage.h
+// Lumieres::FSMeclairage.h
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
 // Ce fichier concerne la machine à état fini pour gérer un éclairage

@@ -1,4 +1,4 @@
-// Batiment01::ConfigNano.h
+// Lumieres::ConfigNano.h
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
 // Ce fichier concerne la configuration matérielle utilisée pour gérer 
