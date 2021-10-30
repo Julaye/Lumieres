@@ -23,6 +23,7 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 ## Notes de version
 
 ### v20211030.3
+- Ajout du type d'éclairage Flash, qui permet de réaliser un automatisme de type photographe Paparazzi sur la détection d'une locomotive
 - Ajout de 4 entrées utilisateurs en Pull-Up, modification de la commande WSTOP en conséquence
 
 ### v20211030.2
