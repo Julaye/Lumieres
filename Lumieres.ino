@@ -12,7 +12,7 @@
 //  v20211030 - ajout du mode gyrophare + reprise de la FSM eclairage (plus grande généricité)
 //  v20211030.2 - Changement du nom de projet -> Lumieres
 //  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash + type Soudure
-//  v20211030.4 - Ajout du type Fire (brasero/bougie) + optimisation de la mémoire dynamique (chasse aux 'long int' inutiles)
+//  v20211030.4 - Ajout du type Fire (brasero/bougie) + optimisation de la mémoire dynamique (chasse aux 'long int' inutiles) + type Servo
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -49,6 +49,8 @@
 // Ce fichier concerne la machine à état fini pour gérer le batiment, la scène, ...
 #include "FSMLumieres.h"
 
+// ---------------------------------------------------------------------
+
 // mettre à 1 pour un debug dans la console série, 2 pour full debug
 const int debug = 1;
 
@@ -57,6 +59,11 @@ const int verbose = 1;
 
 // la configuration de votre automatisme
 #include "ConfigLumieres.h"
+
+// au besoin, structure pour piloter un servo moteur sur D9 ou D10
+#ifdef Servo_h
+Servo gServo;
+#endif
 
 // ---------------------------------------------------------------------
 // --- initFSM()
@@ -127,7 +134,7 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20211030.3 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20211030.4 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   Serial.print("HW RESET -> INIT seed:");
@@ -224,10 +231,16 @@ void set(int led, int value)
 void lightOff(int led)
 {
   if ((debug>1) && (gLight[led].stateRunning != estate_OFF)) Serial.println("estate_OFF");
-  
-  // eteint la led
-  unset(led);
 
+  if (ledCnf[led]==ETYPE_SERVO) {
+    #ifdef Servo_h
+    gServo.write(0);
+    #endif
+  } else {
+    // eteint la led
+    unset(led);
+  }
+  
   // passe en mode démarrage (au cas où)
   gLight[led].stateRunning = estate_OFF;
 }
@@ -235,7 +248,10 @@ void lightOff(int led)
 // démarre l'allumage des lumières
 void lightStartPowerUp(int led)
 {
-  if (debug>1) Serial.println("state_STPWRUP");
+  if (debug) {
+    Serial.print("state_STPWRUP led:");
+    Serial.println(led);
+  }
 
   // si la led est déjà allumée, ne rien faire
   if (gLight[led].stateRunning == estate_ON) return;
@@ -243,7 +259,7 @@ void lightStartPowerUp(int led)
   switch (ledCnf[led]) {
     case ETYPE_STANDARD: 
         gLight[led].stateRunning = estate_ON;
-        if (debug>1) Serial.println(") STANDARD -> state_ON");
+        if (debug>1) Serial.println("STANDARD -> state_ON");
         return;
 
     case ETYPE_NEONNEUF:
@@ -277,10 +293,16 @@ void lightStartPowerUp(int led)
         gLight[led].nextState = estate_STPWRUP;
         break;
 
+    #ifdef Servo_h
+    case ETYPE_SERVO:
+        gServo.attach(2+led);
+        break;
+    #endif
+    
     case ETYPE_NOTUSED:
     default:
         gLight[led].stateRunning = estate_OFF;
-        if (debug>1) Serial.println(") NOTUSED or UNKNOWN -> state_OFF");
+        if (debug) Serial.println("NOTUSED or UNKNOWN -> state_OFF");
         return;    
   }
 
@@ -299,9 +321,11 @@ void lightStartPowerUp(int led)
 void lightOn(int led)
 {
     int alea;
-    
-    set(led,PWM_FOR_LED); 
 
+    if (ledCnf[led]!=ETYPE_SERVO) {
+      set(led,PWM_FOR_LED); 
+    }
+    
     if (ledCnf[led]==ETYPE_NEONVIEUX) {
       // fait un tirage aléatoire et refait un glitch à partir d'une séquence prédéterminée
       // ajuster la valeur random en fonction de la fréquence d'apparition (en ms)
@@ -328,6 +352,14 @@ void lightPowerUp(int led)
       Serial.print(gLight[led].stateDelay);
     }
 
+    #ifdef Servo_h
+    if (ledCnf[led]==ETYPE_SERVO) {
+      gServo.write(90);
+      gLight[led].stateRunning = estate_ON;
+      return;
+    }
+    #endif
+    
     // vérifier si le delai de la transition est écoulé
     if (gLight[led].stateDelay<=0) 
     { 

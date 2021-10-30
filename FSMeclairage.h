@@ -13,7 +13,7 @@ const int ETYPE_FLASH     = 4;
 const int ETYPE_SOUDURE   = 5; /* un seul Poste de soudure par Arduino */
 const int ETYPE_FIRE      = 6; /* une seule simulation de feu par Arduino */
 
-const int ETYPE_SERVO   = 128; /* experimental */
+const int ETYPE_SERVO   = 128; /* un seul servomoteur sur D9 ou D10  */
 
 const int ETYPE_NOTUSED = 255;
 
