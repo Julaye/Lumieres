@@ -14,6 +14,7 @@ const int PERM    = 2; /* durée permanente : jusqu'à l'arrêt de l'Arduino ou 
 const int ALEA    = 3; /* durée aléatoire : permet de rendre aléatoire la présence d'une personne dans un bureau la nuit, aligné sur la commande précédente : STANDBY ou PERM */
 const int WAIT    = 4; /* pause d'une durée définie, ne touche à aucun éclairage */
 const int WSTOP   = 5; /* pause d'une durée indéfinie, ne touche à aucun éclairage, attends que l'entrée startPin passe à l'état LOW */
+const int PWM     = 6; /* envoie le signal sur la sortie si compatible : D3, D5, D6, D9, D10 et D11 */
 const int END    = 99; /* marqueur de fin de séquence */
 const int LOOP   = 88; /* marqueur de boucle pour redémarrer sur le MARK */
 const int MARK   = 77; /* place le marqueur pour le LOOP */

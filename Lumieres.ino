@@ -14,6 +14,7 @@
 //  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash + type Soudure
 //  v20211030.4 - Ajout du type Fire (brasero/bougie) + optimisation de la mémoire dynamique (chasse aux 'long int' inutiles) + type Servo
 //  v20211030.5 - Ajout du type Clignotant, éclairage qui ne clignote que s'il n'est pas permanent !
+//  v20211030.6 - Ajout de la commande PWM pour envoyer sur les sorties compatibles
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -58,12 +59,18 @@ const int PWM_FOR_LED = 16;
 // ---------------------------------------------------------------------
 
 // mettre à 1 pour un debug dans la console série, 2 pour full debug
-const int debug = 1;
+//
+// ATTENTION : en debug, ce sont des séquences de mise au point qui sont
+// executées par l'automate - cf seqDebug1 et seqDebug2 dans le fichier
+// FSMLumieres.h, sur la base de chenillards
+const int debug = 0;
 
-// mettre à 1 pour rendre l'exécution de l'automate verbeux
-const int verbose = 1;
+// mettre à 1 pour rendre l'exécution de l'automate verbeux. C'est 
+// très utile quand on met au point sa séquence de commandes. Ce mode
+// affiche notamment l'état des sorties.
+const int verbose = 0;
 
-// la configuration de votre automatisme
+// la configuration de votre automatisme se trouve dans ce fichier
 #include "ConfigLumieres.h"
 
 // au besoin, structure pour piloter un servo moteur sur D9 ou D10
@@ -140,7 +147,7 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20211030.5 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20211030.6 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   Serial.print("HW RESET -> INIT seed:");
@@ -253,8 +260,8 @@ void lightOff(byte led)
 }
 
 // démarre l'allumage des lumières
-// perm est à true si l'allumage va être permanent
-void lightStartPowerUp(byte led,bool perm=false)
+// param est à true si l'allumage va être permanent
+void lightStartPowerUp(byte led,byte param=false)
 {
   if (debug) {
     Serial.print("state_STPWRUP led:");
@@ -267,6 +274,11 @@ void lightStartPowerUp(byte led,bool perm=false)
   switch (ledCnf[led]) {
     case ETYPE_STANDARD: 
         gLight[led].stateRunning = estate_ON;
+        if (param==0) {
+          gLight[led].param = PWM_FOR_LED;          
+        } else {
+          gLight[led].param = param;
+        }
         if (debug>1) Serial.println("STANDARD -> state_ON");
         return;
 
@@ -302,7 +314,7 @@ void lightStartPowerUp(byte led,bool perm=false)
         break;
 
     case ETYPE_CLIGNOTANT:
-        if (perm) {
+        if (param) {
           gLight[led].stateRunning = estate_ON;
           return;
         }
@@ -345,8 +357,20 @@ void lightOn(byte led)
       Serial.println(led);
     }
 
-    if (ledCnf[led]!=ETYPE_SERVO) {
-      set(led,PWM_FOR_LED); 
+    switch (ledCnf[led]) {
+      case ETYPE_STANDARD:
+        set(led,gLight[led].param); 
+        break;
+
+      case ETYPE_CLIGNOTANT:
+      case ETYPE_NEONNEUF:
+      case ETYPE_NEONVIEUX:
+        set(led,PWM_FOR_LED); 
+        break;
+        
+      case ETYPE_SERVO:
+      default:
+        break;
     }
     
     if (ledCnf[led]==ETYPE_NEONVIEUX) {
@@ -461,12 +485,12 @@ void fsmEclairage()
 // En utilisant le tableau de bits correspondant au mapping 
 // ---------------------------------------------------------------------
 
-void PowerUpLeds(int leds,bool perm=false)
+void PowerUpLeds(int leds,byte param=false)
 {
   int pos = 1;
           
   for (int led=0; led<maxLights; led++) {
-    if (leds&pos) lightStartPowerUp(led,perm);
+    if (leds&pos) lightStartPowerUp(led,param);
     pos = pos << 1;
   }
 }
@@ -515,12 +539,13 @@ int decodeInputPin(int io)
 
 void runningFSM()
 {
-  int  io;
-  int  duration;
-  int  commande;
-  int  r;
+  int       io;
+  int       commande;
 
-  int  ledsoff;
+  long int  duration;
+  long int  r;
+
+  int       ledsoff;
 
   int       pin;
 
@@ -587,6 +612,19 @@ void runningFSM()
           PowerDownLeds(ledsoff&~io);
           break;
 
+      case PWM:
+          Serial.print("PWN duration:");
+          Serial.print(duration);
+          Serial.print(" s cmd:");
+          printCmd(io);
+          
+          /* envoie une commande PWM sur une sortie STANDARD supportant le PWM */
+          PowerUpLeds(io,duration);
+          
+          // prévoir les extinction plus tard
+          gSeq.leds = io | ledsoff;
+          break;
+
       case ALEA:
           /* aléatoirement : permet de rendre aléatoire la présence d'une personne dans un bureau la nuit, aligné sur la commande STANDBY suivante ou PERM précédente */
           if (random(0,duration)==0) {
@@ -635,7 +673,7 @@ void runningFSM()
           break;
 
       case WAIT:
-           if (duration<=0) {
+          if (duration<=0) {
             gSeq.duration = millis() + 500; /* demi seconde */
           } else {
             gSeq.duration = millis() + duration*1000;

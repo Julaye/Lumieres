@@ -43,6 +43,7 @@ typedef struct {
     blink*  pblink;   /* pointeur sur la table des transitions */
     int maxblink;     /* taille de la table des transitions */
     int nextState;    /* état une fois que la table des transitions a été parcourue */
+    byte param;
 } paramLight;
 
 // Pour chaque éclairage
