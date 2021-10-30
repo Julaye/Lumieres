@@ -36,7 +36,7 @@ La documentation proposée présente aussi dans son chapitre 9 de nombreux exemp
 - Gestion de la séquence d'éclairage d'une fosse d'inspection au stationnement d'une locomotive
 - Animation d'un poste de soudure en présence d'une locomotive dans l'atelier
 - Animation de feux tricolores à un croisement routier, inclu les feux en panne (orange clignotant)
-- L'ouverture et la fermeture d'une porte de remise avec un gyrophare de sécurité lorsqu'une locomotise se présente devant la porte
+- L'ouverture et la fermeture d'une porte de remise avec un gyrophare de sécurité lorsqu'une locomotive se présente devant la porte
 - ...
 
 Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la-lumiere-jaillisse/20889/
