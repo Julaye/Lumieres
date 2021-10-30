@@ -52,7 +52,7 @@
 // ---------------------------------------------------------------------
 
 // mettre à 1 pour un debug dans la console série, 2 pour full debug
-const int debug = 1;
+const int debug = 0;
 
 // mettre à 1 pour rendre l'exécution de l'automate verbeux
 const int verbose = 1;
