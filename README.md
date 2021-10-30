@@ -29,7 +29,7 @@ Langage de programmation : C for Arduino Nano
 
 Langue du projet : Français / French
 
-Version pre-release : v20211030.5
+Version pre-release : v20211030.6
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
@@ -46,8 +46,13 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 
 ## Notes de version
 
+### v20211030.6
+- Ajout du type Clignotant qui ne clignote que s'il n'est pas permanent
+- Fixe une régression sur STANDBY à cause de l'optimisation des 'long int'
+
 ### v20211030.5
 - Ajout du type Clignotant qui ne clignote que s'il n'est pas permanent
+- Fixe une régression de l'automate à cause de l'optimisation des 'long int'
 
 ### v20211030.4
 - Ajout du type Servo pour commander un servo moteur 0-90° pour ouvrir ou fermer une porte 
