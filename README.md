@@ -10,9 +10,15 @@ Objectif du projet : Le programme Lumières est une tentative pour proposer aux 
 
 L'utilisateur adapte le fichier *ConfigLumieres.h* selon ses besoins et il obtient un automate opérationnel, sans écrire une seule ligne de code, seulement des données dans le fichier susmentionné. C'est une approche NO CODE - LOW CODE pour surfer sur le buzz des outils de programmation actuels.
 
-Les types d'éclairages supportés actuellement sont : lampe standard, néon neuf, néon fatigué (glitchs), flash de photographe, poste de soudure, feu (bougie/brasero) et gyrophare. Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
-
-En roadmap : la lampe à pétrole, le servomoteur d'une porte ...
+Les types d'éclairages actuellement supportés sont : 
+- lampe standard (allumé ou éteint)
+- néon neuf avec sa séquence d’allumage, 
+- néon fatigué avec des glitchs aléatoires, 
+- flash de photographe avec pre-flash, 
+- poste de soudure à l’arc, 
+- servo moteur 0-90° pour l’ouverture/fermeture d’une porte
+- gyrophare. 
+Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
 Licence : Le logiciel est sous licence GPL et peut être librement utilisé et modifié dans le cadre de notre passion de modélisme, vos éventuelles modifications doivent être reversées à la communauté.
 
@@ -37,6 +43,7 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 ## Notes de version
 
 ### v20211030.4
+- Ajout du type Servo pour commander un servo moteur 0-90° pour ouvrir ou fermer une porte 
 - La valeur 0 dans le paramètre duration permet la demi-seconde pour les commandes SET, WAIT et WSTOP
 - une valeur différente de 0 dans le paramètre duration de la commande UNSET introduit une attente de nombre de secondes spécifié
 - optimisation de la mémoire dynamique (chasse aux 'long int' inutiles)
