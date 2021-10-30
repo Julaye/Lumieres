@@ -6,9 +6,15 @@ EN : Management of a building, a scene or a set of lighting with an Arduino Nano
 
 ## Resumé
 
-Objectif du projet : Le programme **Lumieres** est une tentative pour proposer aux adeptes du modélisme un automate de gestion des éclairages d’un bâtiment, d'une scène ou plus généralement d’un ensemble d’éclairages, qui soit facile d’accès pour un non initié à la programmation d’un Arduino, et fortement paramétrable pour couvrir les besoins les plus courants.
+Objectif du projet : Le programme Lumières est une tentative pour proposer aux adeptes du modélisme un automate de gestion des éclairages d’un bâtiment, d'une scène, ou plus généralement d’un ensemble d’éclairages, qui soit facile d’accès pour un non initié à la programmation d’un Arduino, et fortement paramétrable pour couvrir les besoins les plus courants.
 
-Licence : GPL v3
+L'utilisateur adapte le fichier *ConfigLumieres.h* selon ses besoins et il obtient un automate opérationnel, sans écrire une seule ligne de code, seulement des données dans le fichier susmentionné. C'est une approche NO CODE - LOW CODE pour surfer sur le buzz des outils de programmation actuels.
+
+Les types d'éclairages supportés actuellement sont : lampe standard, néon neuf, néon fatigué (glitchs), flash de photographe, poste de soudure et gyrophare. Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
+
+En roadmap : le brasero, la lampe à pétrole, le servomoteur d'une porte ...
+
+Licence : Le logiciel est sous licence GPL et peut être librement utilisé et modifié dans le cadre de notre passion de modélisme, vos éventuelles modifications doivent être reversées à la communauté.
 
 Langage de programmation : C for Arduino Nano
 
