@@ -560,7 +560,11 @@ void runningFSM()
           break;
             
       case SET:
-          gSeq.duration = millis() + duration*1000;
+          if (duration<=0) {
+            gSeq.duration = millis() + duration*1000; /* demi seconde */
+          } else {
+            gSeq.duration = millis() + duration*1000;
+          }
           gSeq.leds = io;
 
           Serial.print("SET ");
@@ -573,7 +577,11 @@ void runningFSM()
           break;
 
       case WAIT:
-          gSeq.duration = millis() + duration*1000;
+           if (duration<=0) {
+            gSeq.duration = millis() + duration*1000; /* demi seconde */
+          } else {
+            gSeq.duration = millis() + duration*1000;
+          }
           Serial.print("WAIT ");
           Serial.println(duration);
           
@@ -582,7 +590,11 @@ void runningFSM()
           break;
  
       case WSTOP:
-          gSeq.duration = millis() + duration*1000;
+          if (duration<=0) {
+            gSeq.duration = millis() + duration*1000; /* demi seconde */
+          } else {
+            gSeq.duration = millis() + duration*1000;
+          }
 
           // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
           pin = decodeInputPin(io);
