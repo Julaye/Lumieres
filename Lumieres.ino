@@ -113,8 +113,14 @@ void setup() {
   // pin pour démarrer / stopper la FSM générale
   pinMode(startPin,INPUT_PULLUP);
 
+  // 4 entrées utilisateurs
+  pinMode(inputUserPin1,INPUT_PULLUP);
+  pinMode(inputUserPin2,INPUT_PULLUP);
+  pinMode(inputUserPin3,INPUT_PULLUP);
+  pinMode(inputUserPin4,INPUT_PULLUP);
+
   // la germe du générateur aléatoire
-  randomSeed(analogRead(7));
+  randomSeed(analogRead(seedPin));
 
   // Annonce la version
   Serial.println("Lumieres - version 20211030.2 - (c) Julie Dumortier - Licence GPL");
@@ -401,17 +407,41 @@ void PowerDownLeds(long int leds)
 }
 
 // ---------------------------------------------------------------------
+// decodeInputPin()
+// decode l'entrée à utiliser en fonction du numéro inscrit en parametre
+// de la commande
+// ---------------------------------------------------------------------
+
+int decodeInputPin(long int io)
+{
+  int pin;
+  
+  switch (io) {
+    case 0 : pin = startPin; break;
+    case 1 : pin = inputUserPin1; break;
+    case 2 : pin = inputUserPin2; break;
+    case 3 : pin = inputUserPin3; break;
+    case 4 : pin = inputUserPin4; break;
+    default: pin = startPin; break;
+  }
+
+  return pin;
+}
+
+// ---------------------------------------------------------------------
 // running Mode
 // ---------------------------------------------------------------------
 
 void runningFSM()
 {
-  long int  leds;
+  long int  io;
   long int  duration;
-  long int commande;
+  long int  commande;
   long int  r;
 
   long int  ledsoff;
+
+  int       pin;
 
   // vérifie si le compteur de rappel est écoulé
   if (gSeq.duration<millis()) {
@@ -424,7 +454,7 @@ void runningFSM()
      gSeq.leds = 0;
     
     /* lit la séquence suivante */
-    leds = *gpSeq++;
+    io = *gpSeq++;
     duration = *gpSeq++;
     commande = *gpSeq++;     
     
@@ -435,21 +465,21 @@ void runningFSM()
           Serial.println("END -> STOP");
           gSeqState = STOP;
 
-          PowerDownLeds(ledsoff&~leds);
+          PowerDownLeds(ledsoff&~io);
           break;
 
       case MARK: /* place la mark pour un futur LOOP */
           Serial.println("MARK");
           gpMarkSeq = gpSeq-3;
         
-          PowerDownLeds(ledsoff&~leds);
+          PowerDownLeds(ledsoff&~io);
           break;
 
       case LOOP: /* retourne sur la marque */
           Serial.println("LOOP");
           gpSeq = gpMarkSeq;
 
-          PowerDownLeds(ledsoff&~leds);
+          PowerDownLeds(ledsoff&~io);
           break;        
       
       case STANDBY: /* tirage aléatoire en minutes (1 à MAX_STANDBY minutes) */
@@ -459,34 +489,34 @@ void runningFSM()
           Serial.print("STANDBY duration:");
           Serial.print(r);
           Serial.print(" s cmd:");
-          printCmd(leds);
+          printCmd(io);
 
           // prévoir les extinction en même temps que le standby en cours
-          gSeq.leds = leds | ledsoff;
+          gSeq.leds = io | ledsoff;
           
-          PowerUpLeds(leds);
+          PowerUpLeds(io);
          break; 
 
       case PERM: 
           /* permanent : jusqu'à l'arrêt de l'Arduino ou le changement de séquence ou UNSET */
           Serial.print("PERM cmd:");
-          printCmd(leds);
+          printCmd(io);
                     
-          PowerUpLeds(leds);   
-          PowerDownLeds(ledsoff&~leds);
+          PowerUpLeds(io);   
+          PowerDownLeds(ledsoff&~io);
           break;
 
       case ALEA:
           /* aléatoirement : permet de rendre aléatoire la présence d'une personne dans un bureau la nuit, aligné sur la commande STANDBY suivante ou PERM précédente */
           if (random(0,duration)==0) {
             Serial.print("ALEA cmd:");
-            printCmd(leds);
+            printCmd(io);
             
-            PowerUpLeds(leds);
-            gSeq.leds = leds;
+            PowerUpLeds(io);
+            gSeq.leds = io;
           } else {
             Serial.print("ALEA NOPE cmd: ");
-            printCmd(leds);
+            printCmd(io);
 
          }
           
@@ -501,22 +531,22 @@ void runningFSM()
           Serial.print("UNSET ");
           Serial.print(duration);
           Serial.print("s cmd: ");
-          printCmd(leds);
+          printCmd(io);
          
-          PowerDownLeds(leds | ledsoff);
+          PowerDownLeds(io | ledsoff);
           break;
             
       case SET:
           gSeq.duration = millis() + duration*1000;
-          gSeq.leds = leds;
+          gSeq.leds = io;
 
           Serial.print("SET ");
           Serial.print(duration);
           Serial.print("s cmd: ");
-          printCmd(leds);
+          printCmd(io);
           
-          PowerUpLeds(leds);
-          PowerDownLeds(ledsoff&~leds);
+          PowerUpLeds(io);
+          PowerDownLeds(ledsoff&~io);
           break;
 
       case WAIT:
@@ -530,11 +560,14 @@ void runningFSM()
  
       case WSTOP:
           gSeq.duration = millis() + duration*1000;
-          r = (digitalRead(startPin) == HIGH);
+          pin = decodeInputPin(io);
+          r = (digitalRead(pin) == HIGH);
           
           Serial.print("WSTOP ");
           Serial.print(duration);
           Serial.print(" pin: ");
+          Serial.println(pin);
+          Serial.print(" val: ");
           Serial.println(r);
 
           // prévoir les extinction en même temps que le stop en cours

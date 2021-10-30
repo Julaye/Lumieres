@@ -25,7 +25,6 @@ const int LIGHT_FAD8 = PWM_FOR_LED/8;
 const int LIGHT_OFF = 0;
 
 // Configuration du mode de chaque sortie (Arduino Nano)
-
 const int outputMode[] = {
             /* D2 */ MODE_IO,
             /* D3 */ MODE_PWM,
@@ -47,3 +46,12 @@ const int seqPin = 15;
 
 // Entrée digital D14 permettant de passer en RUN (1) ou en STOP (0)  (Pull-up)
 const int startPin = 14; 
+
+// Entrées digitals utilisateur (Pull-Up)
+const int inputUserPin1 = 16;
+const int inputUserPin2 = 17;
+const int inputUserPin3 = 18;
+const int inputUserPin4 = 19;
+
+// Entrée pour le seed Generator
+const int seedPin = 7;
