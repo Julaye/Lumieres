@@ -22,6 +22,9 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 
 ## Notes de version
 
+### v20211030.3
+- Ajout de 4 entrées utilisateurs en Pull-Up, modification de la commande WSTOP en conséquence
+
 ### v20211030.2
 - changement de nom Batiment_v01 -> Lumieres, parce que l'automate s'enrichi progressivement de nombreuses fonctions
 
