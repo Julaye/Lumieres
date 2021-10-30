@@ -125,7 +125,7 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20211030.2 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20211030.3 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   Serial.print("HW RESET -> INIT seed:");
