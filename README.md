@@ -37,6 +37,7 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 ## Notes de version
 
 ### v20211030.4
+- optimisation de la mémoire dynamique (chasse aux 'long int' inutiles)
 - Ajout du type Fire pour simuler une bougie, un brasero
 
 ### v20211030.3
