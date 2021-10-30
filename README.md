@@ -17,7 +17,9 @@ Les types d'éclairages actuellement supportés sont :
 - flash de photographe avec pre-flash, 
 - poste de soudure à l’arc, 
 - servo moteur 0-90° pour l’ouverture/fermeture d’une porte
-- gyrophare. 
+- gyrophare
+- feu clignotant qui ne clignote que s’il n’est pas permanent.
+ 
 
 Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
@@ -27,7 +29,7 @@ Langage de programmation : C for Arduino Nano
 
 Langue du projet : Français / French
 
-Version pre-release : v20211030.4
+Version pre-release : v20211030.5
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
@@ -37,11 +39,15 @@ La documentation proposée présente aussi dans son chapitre 9 de nombreux exemp
 - Animation d'un poste de soudure en présence d'une locomotive dans l'atelier
 - Animation de feux tricolores à un croisement routier, inclu les feux en panne (orange clignotant)
 - L'ouverture et la fermeture d'une porte de remise avec un gyrophare de sécurité lorsqu'une locomotive se présente devant la porte
+- Passage à niveau avec feu clignotant et barrière commandée par un servo
 - ...
 
 Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la-lumiere-jaillisse/20889/
 
 ## Notes de version
+
+### v20211030.5
+- Ajout du type Clignotant qui ne clignote que s'il n'est pas permanent
 
 ### v20211030.4
 - Ajout du type Servo pour commander un servo moteur 0-90° pour ouvrir ou fermer une porte 
