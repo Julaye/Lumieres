@@ -7,11 +7,11 @@
 // type d'éclairage
 const int ETYPE_STANDARD  = 0;
 const int ETYPE_NEONNEUF  = 1;
-const int ETYPE_NEONVIEUX = 2;
+const int ETYPE_NEONVIEUX = 2; /* glitch aléatoire */
 const int ETYPE_GYROPHARE = 3;
 const int ETYPE_FLASH     = 4;
-const int ETYPE_SOUDURE   = 5;
-const int ETYPE_FIRE      = 6;
+const int ETYPE_SOUDURE   = 5; /* un seul Poste de soudure par Arduino */
+const int ETYPE_FIRE      = 6; /* une seule simulation de feu par Arduino */
 
 const int ETYPE_SERVO   = 128; /* experimental */
 

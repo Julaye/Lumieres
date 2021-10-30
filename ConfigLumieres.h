@@ -35,7 +35,7 @@ const int ledCnf[] = {
 // Cf le fichier FSMLumieres.h pour la signification de chaque commande utilisée
 
 /* Séquence 1 : Miss Pélerin passe (avec ou sans M. Gaston) */
-long int mySeq1[] = {
+const int mySeq1[] = {
                       2,     10, SET, /* allume l'accueil (néon neuf) pendant 10 secondes */
                       2+32,  10, SET, /* laisse l'accueil allumé et allume le couloir RDC (néon neuf) pendant 10 secondes */
                       16+32, 10, SET, /* éteint l'accueil et allume le couloir RDC (néon neuf) et l'escalier (néon ancien) pendant 10 secondes */
@@ -54,7 +54,7 @@ long int mySeq1[] = {
 };
 
 /* Séquence 2 : le dépot fonctionne de nuit */
-long int mySeq2[] = {
+const int mySeq2[] = {
                       2,     10, SET,
                       2,     0,  PERM,
                       32,    10, SET,

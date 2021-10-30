@@ -19,10 +19,10 @@ const int LOOP   = 88; /* marqueur de boucle pour redémarrer sur le MARK */
 const int MARK   = 77; /* place le marqueur pour le LOOP */
 
 // Pointeur vers la séquence en cours, une séquence étant une suite de couple (éclairages, durée, commande)
-long int* gpSeq;
+int* gpSeq;
 
 // Pointeur vers la mark
-long int* gpMarkSeq;
+int* gpMarkSeq;
 
 // machine à état des séquences
 const int START    = 0; /* état initial */
@@ -37,9 +37,9 @@ bool gCurrentStateStartPin;
 
 // parametres de l'automate
 struct {
-    long int duration;     /* durée avant la transition */
-    long int leds;         /* leds concernés par la transition */
-    int command;           /* commande associée */
+    int duration;     /* durée avant la transition */
+    int leds;         /* leds concernés par la transition */
+    int command;      /* commande associée */
 } gSeq;
 
 // ---------------------------------------------------------------------
@@ -48,7 +48,7 @@ struct {
 // ---------------------------------------------------------------------
 
 /* Séquence 1 : un simple chenillard sur les sorties D3, D5 et D6 , c'est bien ! */
-long int seqDebug1[] = {
+const int seqDebug1[] = {
    0,      0,  MARK, /* place une MARK pour le LOOP */
    512,    0,  PERM, /* Allume D11 le gyrophare */
    2,      10, SET,  /* Allume D3 (éclairage standard) pendant 10 secondes */
@@ -62,7 +62,7 @@ long int seqDebug1[] = {
 };
 
 /* Séquence 2 :  un chenillard sur l'ensemble des sorties, c'est encore mieux ! */
-long int seqDebug2[] = {
+const int seqDebug2[] = {
     0,      0,  MARK, /* place une MARK pour le LOOP */
     1,      10, SET,
     2,      10, SET,

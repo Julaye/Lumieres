@@ -12,7 +12,7 @@
 //  v20211030 - ajout du mode gyrophare + reprise de la FSM eclairage (plus grande généricité)
 //  v20211030.2 - Changement du nom de projet -> Lumieres
 //  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash + type Soudure
-//  v20211030.4 - Ajout du type Fire (brasero/bougie)
+//  v20211030.4 - Ajout du type Fire (brasero/bougie) + optimisation de la mémoire dynamique (chasse aux 'long int' inutiles)
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -76,10 +76,10 @@ void initFSM()
   
   if (debug) {
     Serial.println(" - Debug");
-    (seq==LOW)?gpSeq=seqDebug1:gpSeq=seqDebug2;
+    (seq==LOW)?gpSeq=(int*)&seqDebug1:gpSeq=(int*)&seqDebug2;
   } else {
     Serial.println(" - Normal");
-    (seq==LOW)?gpSeq=mySeq1:gpSeq=mySeq2;
+    (seq==LOW)?gpSeq=(int*)&mySeq1:gpSeq=(int*)&mySeq2;
   }
 
   // mark par défaut sur le début de la séquence
@@ -140,10 +140,10 @@ void setup() {
 // commande et l'état courant des leds.
 // ---------------------------------------------------------------------
 
-long int mapLeds = 0;
-long int prevMapLeds = 0;
+int mapLeds = 0;
+int prevMapLeds = 0;
 
-void printCmd(long int leds,bool timing=false)
+void printCmd(int leds,bool timing=false)
 {
   int pos = 1;
 
@@ -403,7 +403,7 @@ void fsmEclairage()
 // En utilisant le tableau de bits correspondant au mapping 
 // ---------------------------------------------------------------------
 
-void PowerUpLeds(long int leds)
+void PowerUpLeds(int leds)
 {
   int pos = 1;
           
@@ -418,7 +418,7 @@ void PowerUpLeds(long int leds)
 // Met en off les leds qui ont besoin de l'être
 // ---------------------------------------------------------------------
 
-void PowerDownLeds(long int leds)
+void PowerDownLeds(int leds)
 {
   int pos = 1;
           
@@ -434,7 +434,7 @@ void PowerDownLeds(long int leds)
 // de la commande
 // ---------------------------------------------------------------------
 
-int decodeInputPin(long int io)
+int decodeInputPin(int io)
 {
   int pin;
 
@@ -457,12 +457,12 @@ int decodeInputPin(long int io)
 
 void runningFSM()
 {
-  long int  io;
-  long int  duration;
-  long int  commande;
-  long int  r;
+  int  io;
+  int  duration;
+  int  commande;
+  int  r;
 
-  long int  ledsoff;
+  int  ledsoff;
 
   int       pin;
 
