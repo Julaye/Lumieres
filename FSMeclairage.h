@@ -10,6 +10,7 @@ const int ETYPE_NEONNEUF  = 1;
 const int ETYPE_NEONVIEUX = 2;
 const int ETYPE_GYROPHARE = 3;
 const int ETYPE_FLASH     = 4;
+const int ETYPE_SOUDURE   = 5;
 const int ETYPE_SERVO   = 128; /* experimental */
 const int ETYPE_NOTUSED = 255;
 

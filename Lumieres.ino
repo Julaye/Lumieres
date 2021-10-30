@@ -11,7 +11,7 @@
 //  v20211029.3 - La germe du générateur n'était pas vraiment aléatoire ... (pratique pour les tests, moins pour l'authenticité)
 //  v20211030 - ajout du mode gyrophare + reprise de la FSM eclairage (plus grande généricité)
 //  v20211030.2 - Changement du nom de projet -> Lumieres
-//  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash
+//  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash + type Soudure
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -42,6 +42,7 @@
 // Ces fichiers permettent de simuler un néon, un gyrophare, ...
 #include "SimuNeon.h"
 #include "SimuGyrophare.h"
+#include "SimuSoudure.h"
 
 // Ce fichier concerne la machine à état fini pour gérer le batiment, la scène, ...
 #include "FSMLumieres.h"
@@ -260,6 +261,12 @@ void lightStartPowerUp(int led)
         gLight[led].pblink = (blink*)&blinkFlash;
         gLight[led].maxblink = sizeof(blinkFlash)/sizeof(blink);
         gLight[led].nextState = estate_OFF;
+        break;
+
+    case ETYPE_SOUDURE:
+        gLight[led].pblink = (blink*)&blinkSoudure;
+        gLight[led].maxblink = construitTableauSoudure();
+        gLight[led].nextState = estate_STPWRUP;
         break;
        
     case ETYPE_NOTUSED:

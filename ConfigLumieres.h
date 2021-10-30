@@ -26,7 +26,7 @@ const int ledCnf[] = {
             /* D8 */ ETYPE_NEONNEUF,   /* 64 : bureau M. Gaston (IO) */
             /* D9 */ ETYPE_NEONNEUF,   /* 128 : bureau secrétaire (PWM) */
             /* D10 */ ETYPE_STANDARD,  /* 256 : bureau Mlle Pélerin (PWM) */
-            /* D11 */ ETYPE_FLASH  /* 512 : gyrophare (PWM) */
+            /* D11 */ ETYPE_SOUDURE  /* 512 : gyrophare (PWM) */
 };
 
 // Séquence est une liste de couple (sorties, durée d'allumage en secondes, commande)
