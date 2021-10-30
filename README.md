@@ -18,6 +18,7 @@ Les types d'éclairages actuellement supportés sont :
 - poste de soudure à l’arc, 
 - servo moteur 0-90° pour l’ouverture/fermeture d’une porte
 - gyrophare. 
+
 Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
 Licence : Le logiciel est sous licence GPL et peut être librement utilisé et modifié dans le cadre de notre passion de modélisme, vos éventuelles modifications doivent être reversées à la communauté.
