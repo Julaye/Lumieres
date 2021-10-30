@@ -561,7 +561,7 @@ void runningFSM()
             
       case SET:
           if (duration<=0) {
-            gSeq.duration = millis() + duration*1000; /* demi seconde */
+            gSeq.duration = millis() + 500; /* demi seconde */
           } else {
             gSeq.duration = millis() + duration*1000;
           }
@@ -578,7 +578,7 @@ void runningFSM()
 
       case WAIT:
            if (duration<=0) {
-            gSeq.duration = millis() + duration*1000; /* demi seconde */
+            gSeq.duration = millis() + 500; /* demi seconde */
           } else {
             gSeq.duration = millis() + duration*1000;
           }
@@ -591,7 +591,7 @@ void runningFSM()
  
       case WSTOP:
           if (duration<=0) {
-            gSeq.duration = millis() + duration*1000; /* demi seconde */
+            gSeq.duration = millis() + 500; /* demi seconde */
           } else {
             gSeq.duration = millis() + duration*1000;
           }
