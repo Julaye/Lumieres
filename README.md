@@ -24,6 +24,14 @@ Version pre-release : v20211030.2
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
+La documentation proposée présente aussi dans son chapitre 9 de nombreux exemples d'automatismes qui sont faciles à réaliser avec cet automate :
+- Photographe paparazzi dont le flash se déclenche au passage d'un train
+- Gestion de la séquence d'éclairage d'une fosse d'inspection au stationnement d'une locomotive
+- Animation d'un poste de soudure en présence d'une locomotive dans l'atelier
+- Animation de feux tricolores à un croisement routier, inclu les feux en panne (orange clignotant)
+- L'ouverture et la fermeture d'une porte de remise avec un gyrophare de sécurité lorsqu'une locomotise se présente devant la porte
+- ...
+
 Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la-lumiere-jaillisse/20889/
 
 ## Notes de version
