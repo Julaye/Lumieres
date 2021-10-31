@@ -26,4 +26,4 @@ const blink blinkNeon[] = {
 }; 
 
 // numéro de la transition pour reprendre l'enchainement sur un glitch de néon
-const int INDEX_GLITCHPWRUP = 22;
+const byte INDEX_GLITCHPWRUP = 22;

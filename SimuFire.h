@@ -5,13 +5,13 @@
 // faut envoyer à une led pour simuler un feu
 //
 
-const int maxBlinkFire = 32;
+const byte maxBlinkFire = 24;
 
 // le tableau va devoir etre construit avec l'algorithme 
 blink blinkFire[maxBlinkFire];
 
 // cette fonction construit le tableau est retourne le nombre d'événements à générer
-int construitTableauFire()
+byte construitTableauFire()
 {
   for (int i = 0 ; i < maxBlinkFire ; i++)
   {

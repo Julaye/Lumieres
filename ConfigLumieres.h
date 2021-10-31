@@ -18,17 +18,17 @@
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE BATIMENT ---
 
 // Affectation des types d'éclairage ou de fonctions à chaque sortie
-const int ledCnf[] = {
-            /* D2 */ ETYPE_NEONNEUF,   /* 1 : bureau administratif (IO) *
-            /* D3 */ ETYPE_NEONNEUF,   /* 2 : accueil (PWM) */
-            /* D4 */ ETYPE_STANDARD,   /* 4 : bureau M. CLaude (IO) */
-            /* D5 */ ETYPE_NEONNEUF,   /* 8 : couloir haut (PWM) */
-            /* D6 */ ETYPE_NEONVIEUX,  /* 16 : escalier (PWM) */
-            /* D7 */ ETYPE_NEONNEUF,   /* 32 : couloir bas (IO) */
-            /* D8 */ ETYPE_NEONNEUF,   /* 64 : bureau M. Gaston (IO) */
-            /* D9 */ ETYPE_NEONNEUF,   /* 128 : bureau secrétaire (PWM) */
-            /* D10 */ ETYPE_STANDARD,  /* 256 : bureau Mlle Pélerin (PWM) */
-            /* D11 */ ETYPE_GYROPHARE  /* 512 : gyrophare (PWM) */
+const byte ledCnf[] = {
+            /* D2 */ ETYPE_NEONNEUF,   /* S1 (1)  : bureau administratif (IO) *
+            /* D3 */ ETYPE_NEONNEUF,   /* S2 (2)  : accueil (PWM) */
+            /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : bureau M. CLaude (IO) */
+            /* D5 */ ETYPE_NEONNEUF,   /* S4 (8)  : couloir haut (PWM) */
+            /* D6 */ ETYPE_NEONVIEUX,  /* S5 (16) : escalier (PWM) */
+            /* D7 */ ETYPE_NEONNEUF,   /* S6 (32) : couloir bas (IO) */
+            /* D8 */ ETYPE_NEONNEUF,   /* S7 (64) : bureau M. Gaston (IO) */
+            /* D9 */ ETYPE_NEONNEUF,   /* S8 (128) ou SM1 : bureau secrétaire (PWM) */
+            /* D10 */ ETYPE_STANDARD,  /* S9 (256) ou SM2 : bureau Mlle Pélerin (PWM) */
+            /* D11 */ ETYPE_GYROPHARE  /* S10 (512) : gyrophare (PWM) */
 };
 
 // Pour la commande d'un servo moteur sur la sortie D9 ou D10 uniquement
@@ -39,49 +39,49 @@ const int ledCnf[] = {
 // Cf le fichier FSMLumieres.h pour la signification de chaque commande utilisée
 
 /* Séquence 1 : Miss Pélerin passe (avec ou sans M. Gaston) */
-const int mySeq1[] = {
-                      2,     10, SET, /* allume l'accueil (néon neuf) pendant 10 secondes */
-                      2+32,  10, SET, /* laisse l'accueil allumé et allume le couloir RDC (néon neuf) pendant 10 secondes */
-                      16+32, 10, SET, /* éteint l'accueil et allume le couloir RDC (néon neuf) et l'escalier (néon ancien) pendant 10 secondes */
-                      16+8,  10, SET, /* ETC :)  */
-                      8+256, 10, SET,
-                      64,    2, ALEA, /* parfois M. gaston accompagne la miss (50% de chance) */  
-                      128,   2, ALEA, /* parfois la secrétaire accompagne la miss (50% chance) */
-                      256,   10, STANDBY, /* la miss reste dans son bureau un certain temps (1 à 10 minutes) */
-                      8+256, 2, SET,
-                      8,     10, SET,
-                      8+16,  10, SET,
-                      16+32, 10, SET,
-                      32+2,  10, SET,
-                      2,     10, SET, /* éteint le couloir du RDC, allume l'accueil pendant 10 secondes */
-                      0,     0,  END  /* fin de la séquence, tout est éteint */
-};
+DEBUTSEQ(mySeq1)
+  SET(S2,10)    /* allume l'accueil (néon neuf) pendant 10 secondes */
+  SET(S2+S6,10) /* laisse l'accueil allumé et allume le couloir RDC (néon neuf) pendant 10 secondes */
+  SET(S5+S6,10) /* éteint l'accueil et allume le couloir RDC (néon neuf) et l'escalier (néon ancien) pendant 10 secondes */
+  SET(S5+S4,10) /* ETC :)  */
+  SET(S4+S9,10)
+  ALEA(S7,2)    /* parfois M. gaston accompagne la miss (50% de chance) */  
+  ALEA(S8,2)    /* parfois la secrétaire accompagne la miss (50% chance) */
+  STANDBY(S9,10) /* la miss reste dans son bureau un certain temps (1 à 10 minutes) */
+  SET(S4+S9,2)
+  SET(S4,10)
+  SET(S4+S5,10)
+  SET(S5+S6,10)
+  SET(S6+S2,10)
+  SET(S2,10)   /* éteint le couloir du RDC, allume l'accueil pendant 10 secondes */
+  END          /* fin de la séquence, tout est éteint */
+FINSEQ(mySeq1)
 
 /* Séquence 2 : le dépot fonctionne de nuit */
-const int mySeq2[] = {
-                      2,     10, SET,
-                      2,     0,  PERM,
-                      32,    10, SET,
-                      32+1,  2,  SET,
-                      1,     2,  SET,
-                      1,     0,  PERM,
-                      16,   10,  SET,
-                      16+8, 10,  SET,
-                      8,     0,  PERM,  
-                      256,   4,  ALEA,
-                      64,    2,  ALEA,
-                      4,     2,  ALEA,
-                      128,   2,  ALEA,
-                      0,     3,  WSTOP, /* attend que le bouton Jour/Nuit passe à LOW, test toutes les 3 secondes */
-                      256+128+64+4, 0, UNSET, /* éteint les bureaux de l'étage */
-                      16,   10,  SET,
-                      8+1,   0, UNSET,  /* eteint couloir haut et administratif */
-                      0,     10, WAIT,
-                      32,    0, UNSET, /* éteint couloir bas */
-                      0,     10, WAIT,
-                      1,     0, UNSET, /* éteint accueil */
-                      0,     0,  END   /* fin de la séquence */
-};
+DEBUTSEQ(mySeq2)
+  SET(S2,10)
+  PERM(S2)
+  SET(S6,10)  
+  SET(S6+S1,2)
+  SET(S1,2)
+  PERM(S1)
+  SET(S5,10)
+  SET(S5+S4,10)
+  PERM(S8)
+  ALEA(S9,4)
+  ALEA(S7,2)  
+  ALEA(S3,2)
+  ALEA(S8,2)
+  WSTOP(ESTARTB,3)
+  UNSET(S9+S8+S7+S3) /* éteint les bureaux de l'étage */
+  SET(S5,10)
+  UNSET(S4+S1)       /* eteint couloir haut et administratif */
+  WAIT(10)
+  UNSET(S6)          /* éteint couloir bas */
+  WAIT(10)
+  UNSET(S1)          /* éteint accueil */
+  END                /* fin de la séquence */
+FINSEQ(mySeq2)
 
 // --- ICI SE TERMINE LA CONFIGURATION EN FONCTION DE VOTRE SCENE    ---
 // ---------------------------------------------------------------------

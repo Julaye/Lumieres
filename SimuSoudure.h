@@ -9,21 +9,21 @@
 //
 
 //
-const int Duree_flash_mini = 10 ;
-const int Duree_flash_maxi = 101 ;
-const int Duree_int_mini = 10 ;
-const int Duree_int_maxi = 31 ;
-const int Nbre_even_mini = 10 ;
-const int Nbre_even_maxi = 21 ;
+const byte Duree_flash_mini = 10 ;
+const byte Duree_flash_maxi = 101 ;
+const byte Duree_int_mini = 10 ;
+const byte Duree_int_maxi = 31 ;
+const byte Nbre_even_mini = 10 ;
+const byte Nbre_even_maxi = 21 ;
 const int P_repos_mini = 1500 ;
-const int P_repos_maxi = 7001 ;
+const int P_repos_maxi = 7000 ;
 
 // le tableau va devoir etre construit avec l'algorithme
 // proposé par Locoduino ... facile
 blink blinkSoudure[Nbre_even_maxi * 2 + 1];
 
 // cette fonction construit le tableau est retourne le nombre d'événements à générer
-int construitTableauSoudure()
+byte construitTableauSoudure()
 {
   int  Nbre_even = random (Nbre_even_mini, Nbre_even_maxi) ;
   int  n = 0;

@@ -14,7 +14,8 @@
 //  v20211030.3 - Ajout des 4 entrées utilisateurs et enrichissement de la commande WSTOP en conséquence + type Flash + type Soudure
 //  v20211030.4 - Ajout du type Fire (brasero/bougie) + optimisation de la mémoire dynamique (chasse aux 'long int' inutiles) + type Servo
 //  v20211030.5 - Ajout du type Clignotant, éclairage qui ne clignote que s'il n'est pas permanent !
-//  v20211030.6 - Ajout de la commande PWM pour envoyer sur les sorties compatibles
+//  v20211030.6 - Ajout de la commande PWM pour envoyer un signal sur les sorties compatibles
+//  v20211031 - optimisation des variables globales + macro langage pour faciliter l'écriture des automatismes (lisibilité)
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -35,6 +36,7 @@
 // La documentation est accessible ici : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
 #include <Arduino.h>
+//#include <MemoryUsage.h>
 
 // l'intensité maximum de chaque sortie PWM pour vos LEDs
 // à adapter en fonction de votre situation, entre 16 et 255 !
@@ -52,6 +54,9 @@ const int PWM_FOR_LED = 16;
 #include "SimuGyrophare.h"
 #include "SimuSoudure.h"
 #include "SimuFire.h"
+
+// le macro-langage pour simplifier la vie de l'utilisateur de l'automate
+#include "MacroLumieres.h"
 
 // Ce fichier concerne la machine à état fini pour gérer le batiment, la scène, ...
 #include "FSMLumieres.h"
@@ -111,7 +116,7 @@ void initFSM()
 
   gSeq.duration = millis();
   gSeq.leds = 0;
-  gSeq.command = SET;
+  gSeq.command = _SET;
 }
 
 // ---------------------------------------------------------------------
@@ -147,7 +152,7 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20211030.6 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20211031 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   Serial.print("HW RESET -> INIT seed:");
@@ -567,28 +572,28 @@ void runningFSM()
     /* decode the instruction */
     switch (commande) {
 
-      case END:
+      case _END:
           Serial.println("END -> STOP");
           gSeqState = STOP;
 
           PowerDownLeds(ledsoff&~io);
           break;
 
-      case MARK: /* place la mark pour un futur LOOP */
+      case _MARK: /* place la mark pour un futur LOOP */
           Serial.println("MARK");
           gpMarkSeq = gpSeq-3;
         
           PowerDownLeds(ledsoff&~io);
           break;
 
-      case LOOP: /* retourne sur la marque */
+      case _LOOP: /* retourne sur la marque */
           Serial.println("LOOP");
           gpSeq = gpMarkSeq;
 
           PowerDownLeds(ledsoff&~io);
           break;        
       
-      case STANDBY: /* tirage aléatoire en minutes (1 à MAX_STANDBY minutes) */
+      case _STANDBY: /* tirage aléatoire en minutes (1 à MAX_STANDBY minutes) */
           r = random(1,duration)*60;
           gSeq.duration = millis() + r*1000;
           
@@ -603,7 +608,7 @@ void runningFSM()
           PowerUpLeds(io);
          break; 
 
-      case PERM: 
+      case _PERM: 
           /* permanent : jusqu'à l'arrêt de l'Arduino ou le changement de séquence ou UNSET */
           Serial.print("PERM cmd:");
           printCmd(io);
@@ -612,7 +617,7 @@ void runningFSM()
           PowerDownLeds(ledsoff&~io);
           break;
 
-      case PWM:
+      case _PWM:
           Serial.print("PWN duration:");
           Serial.print(duration);
           Serial.print(" s cmd:");
@@ -625,7 +630,7 @@ void runningFSM()
           gSeq.leds = io | ledsoff;
           break;
 
-      case ALEA:
+      case _ALEA:
           /* aléatoirement : permet de rendre aléatoire la présence d'une personne dans un bureau la nuit, aligné sur la commande STANDBY suivante ou PERM précédente */
           if (random(0,duration)==0) {
             Serial.print("ALEA cmd:");
@@ -644,7 +649,7 @@ void runningFSM()
 
           break;
 
-      case UNSET:
+      case _UNSET:
           gSeq.duration = millis() + duration*1000;
  
           Serial.print("UNSET ");
@@ -655,7 +660,7 @@ void runningFSM()
           PowerDownLeds(io | ledsoff);
           break;
             
-      case SET:
+      case _SET:
           if (duration<=0) {
             gSeq.duration = millis() + 500; /* demi seconde */
           } else {
@@ -672,7 +677,7 @@ void runningFSM()
           PowerDownLeds(ledsoff&~io);
           break;
 
-      case WAIT:
+      case _WAIT:
           if (duration<=0) {
             gSeq.duration = millis() + 500; /* demi seconde */
           } else {
@@ -685,7 +690,7 @@ void runningFSM()
           gSeq.leds = ledsoff;
           break;
  
-      case WSTOP:
+      case _WSTOP:
           if (duration<=0) {
             gSeq.duration = millis() + 500; /* demi seconde */
           } else {
@@ -756,6 +761,10 @@ void loop() {
 
         // et indiquer que la séquence de démarrage a bien été détectée
         gCurrentStateStartPin=true;
+
+        #ifdef __MemoryUsage_h__
+        SRamDisplay();
+        #endif
       }
       break;
 
