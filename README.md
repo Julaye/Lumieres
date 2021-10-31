@@ -47,7 +47,7 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 ## Notes de version
 
 ### v20211030.6
-- Ajout du type Clignotant qui ne clignote que s'il n'est pas permanent
+- Ajout de la commande PWM
 - Fixe une régression sur STANDBY à cause de l'optimisation des 'long int'
 
 ### v20211030.5
