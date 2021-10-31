@@ -46,6 +46,10 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 
 ## Notes de version
 
+### v20211031
+- introduction d'un macro langage pour simplifier la lecture d'une séquence d'automatisme
+- optimise encore un peu la mémoire utilisée (int -> byte quand possible)
+
 ### v20211030.6
 - Ajout de la commande PWM
 - Fixe une régression sur STANDBY à cause de l'optimisation des 'long int'
