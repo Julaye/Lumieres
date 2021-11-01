@@ -69,7 +69,7 @@ const int PWM_FOR_LED = 64;
 // ATTENTION : en debug, ce sont des séquences de mise au point qui sont
 // executées par l'automate - cf seqDebug1 et seqDebug2 dans le fichier
 // FSMLumieres.h, sur la base de chenillards
-const int debug = 1;
+const int debug = 0;
 
 // mettre à 1 pour rendre l'exécution de l'automate verbeux. C'est 
 // très utile quand on met au point sa séquence de commandes. Ce mode
@@ -156,7 +156,7 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20211031 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20211101 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   Serial.print("HW RESET -> INIT seed:");
