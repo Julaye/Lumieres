@@ -16,6 +16,7 @@
 //  v20211030.5 - Ajout du type Clignotant, éclairage qui ne clignote que s'il n'est pas permanent !
 //  v20211030.6 - Ajout de la commande PWM pour envoyer un signal sur les sorties compatibles
 //  v20211031 - optimisation des variables globales + macro langage pour faciliter l'écriture des automatismes (lisibilité)
+//  v20211101 - AJout des commandes ATTACH/DETACH qui permet de lier le cyle d'une ou plusieurs sorties avec l'état d'entrée
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -41,7 +42,7 @@
 // l'intensité maximum de chaque sortie PWM pour vos LEDs
 // à adapter en fonction de votre situation, entre 16 et 255 !
 // Ne pas oublier la résistance de 220 ohms pour les protéger
-const int PWM_FOR_LED = 16;
+const int PWM_FOR_LED = 64;
 
 // Ce fichier concerne la configuration matérielle Arduino utilisée
 #include "ConfigNano.h"
@@ -68,12 +69,12 @@ const int PWM_FOR_LED = 16;
 // ATTENTION : en debug, ce sont des séquences de mise au point qui sont
 // executées par l'automate - cf seqDebug1 et seqDebug2 dans le fichier
 // FSMLumieres.h, sur la base de chenillards
-const int debug = 0;
+const int debug = 1;
 
 // mettre à 1 pour rendre l'exécution de l'automate verbeux. C'est 
 // très utile quand on met au point sa séquence de commandes. Ce mode
 // affiche notamment l'état des sorties.
-const int verbose = 0;
+const int verbose = 1;
 
 // la configuration de votre automatisme se trouve dans ce fichier
 #include "ConfigLumieres.h"
@@ -92,7 +93,10 @@ void initFSM()
   byte seq;
 
   // Initialise l'automate de chaque sortie
-  for (int i = 0 ; i < maxLights; i++) gLight[i].stateRunning = estate_OFF;
+  for (int i = 0 ; i < maxLights; i++) {
+    gLight[i].stateRunning = estate_OFF;
+    gLight[i].link = LightNotLinked;
+  }
 
   // récupère la séquence pour le mode RUNNING
   seq = digitalRead(seqPin);
@@ -243,6 +247,85 @@ void set(byte led, int value)
 }
 
 // ---------------------------------------------------------------------
+// decodeInputPin()
+// decode l'entrée à utiliser en fonction du numéro inscrit en parametre
+// de la commande
+// ---------------------------------------------------------------------
+
+int decodeInputPin(int io)
+{
+  byte pin;
+
+  // applique un filtre pour extraire le numéro de l'entrée
+  switch (io&0x7F) {
+    case 0 : pin = startPin; break;
+    case 1 : pin = inputUserPin1; break;
+    case 2 : pin = inputUserPin2; break;
+    case 3 : pin = inputUserPin3; break;
+    case 4 : pin = inputUserPin4; break;
+    default: pin = startPin; break;
+  }
+
+  return pin;
+}
+
+// ---------------------------------------------------------------------
+// Led liée à une entrée
+// ---------------------------------------------------------------------
+
+bool linkOff(byte led) 
+{
+    byte pin;
+    bool r;
+    
+    // la led est-elle liée à une entrée ? */
+    if (gLight[led].link != LightNotLinked) {
+
+      // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
+      pin = decodeInputPin(gLight[led].link);
+
+      // test la condition d'allumage
+      r = (digitalRead(pin) == ((gLight[led].link&80)?LOW:HIGH));
+      if (r) {
+        Serial.print("LINK in:");
+        Serial.print(pin);
+        Serial.println(" said --> state OFF");
+        
+        gLight[led].stateRunning = estate_OFF;
+        return true;
+      }
+    }
+    
+    return false;
+}
+
+bool linkOn(byte led) 
+{
+    byte pin;
+    bool r;
+    
+    // la led est-elle liée à une entrée ? */
+    if (gLight[led].link != LightNotLinked) {
+
+      // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
+      pin = decodeInputPin(gLight[led].link);
+
+      // test la condition d'allumage
+      r = (digitalRead(pin) == ((gLight[led].link&80)?LOW:HIGH));
+      if (!r) {
+        Serial.print("LINK in:");
+        Serial.print(pin);
+        Serial.println(" said --> state STPWRUP");
+        
+        gLight[led].stateRunning = estate_STPWRUP;
+        return true;
+      }
+    }
+    
+    return false;
+}
+ 
+// ---------------------------------------------------------------------
 // Fonctions de support pour la FSM éclairage d'une led
 // ---------------------------------------------------------------------
 
@@ -250,6 +333,9 @@ void set(byte led, int value)
 void lightOff(byte led)
 {
   if ((debug>1) && (gLight[led].stateRunning != estate_OFF)) Serial.println("estate_OFF");
+
+  // la led est-elle liée à une entrée ? */
+  if (linkOn(led)) return;
 
   if (ledCnf[led]==ETYPE_SERVO) {
     #ifdef Servo_h
@@ -268,6 +354,7 @@ void lightOff(byte led)
 // param est à true si l'allumage va être permanent
 void lightStartPowerUp(byte led,byte param=false)
 {
+
   if (debug) {
     Serial.print("state_STPWRUP led:");
     Serial.println(led);
@@ -357,6 +444,9 @@ void lightOn(byte led)
 {
     int alea;
 
+    // la led est-elle liée à une entrée ? */
+    if (linkOff(led)) return;
+    
     if (debug>1) {
       Serial.print("state_ON led:");
       Serial.println(led);
@@ -396,7 +486,10 @@ void lightOn(byte led)
 
 // gère une séquence d'allumage
 void lightPowerUp(byte led)
-{
+{ 
+    // la led est-elle liée à une entrée ? */
+    if (linkOff(led)) return;
+
     if (debug>1) {
       Serial.print("state_PWRUP led:");
       Serial.print(led);
@@ -415,18 +508,18 @@ void lightPowerUp(byte led)
     // vérifier si le delai de la transition est écoulé
     if (gLight[led].stateDelay<=0) 
     { 
-        if (debug) {
+        if (debug>1) {
           Serial.print(led);
           Serial.print("- Blink sequence:");
           Serial.print(gLight[led].statePwrup);
           Serial.print(" intensity: ");
         }
         
-        if (debug) Serial.print(gLight[led].pblink[gLight[led].statePwrup].intensity);
+        if (debug>1) Serial.print(gLight[led].pblink[gLight[led].statePwrup].intensity);
 
         gLight[led].stateDelay = gLight[led].pblink[gLight[led].statePwrup].duration;
-        if (debug) Serial.print(" duration: ");
-        if (debug) Serial.println(gLight[led].stateDelay);
+        if (debug>1) Serial.print(" duration: ");
+        if (debug>1) Serial.println(gLight[led].stateDelay);
 
         set(led,gLight[led].pblink[gLight[led].statePwrup].intensity);
         
@@ -438,6 +531,34 @@ void lightPowerUp(byte led)
   }
   if (debug>1) Serial.print(".");
   gLight[led].stateDelay--;
+}
+
+// ---------------------------------------------------------------------
+// LINK / UNLINK
+// ---------------------------------------------------------------------
+
+// connecte une led avec une sortie
+void lightLink(byte led, byte input)
+{
+  gLight[led].link = input;
+  if (verbose) {
+    Serial.print("Link led:");
+    Serial.print(led);
+    Serial.print(" with input:");
+    Serial.println(input);
+  }
+  lightStartPowerUp(led);
+}
+
+// déconnecte une led avec une sortie
+void lightUnlink(byte led)
+{
+  gLight[led].link = LightNotLinked;
+  if (verbose) {
+    Serial.print("UnLink led:");
+    Serial.println(led);
+  }
+  lightOff(led);
 }
 
 // ---------------------------------------------------------------------
@@ -516,26 +637,28 @@ void PowerDownLeds(int leds)
 }
 
 // ---------------------------------------------------------------------
-// decodeInputPin()
-// decode l'entrée à utiliser en fonction du numéro inscrit en parametre
-// de la commande
+// Attach/DetachLeds
+// Met en lien les leds qui ont besoin de l'être
 // ---------------------------------------------------------------------
 
-int decodeInputPin(int io)
+void AttachLeds(int leds,byte input)
 {
-  int pin;
-
-  // applique un filtre pour extraire le numéro de l'entrée
-  switch (io&0x7F) {
-    case 0 : pin = startPin; break;
-    case 1 : pin = inputUserPin1; break;
-    case 2 : pin = inputUserPin2; break;
-    case 3 : pin = inputUserPin3; break;
-    case 4 : pin = inputUserPin4; break;
-    default: pin = startPin; break;
+  int pos = 1;
+          
+  for (int led=0; led<maxLights; led++) {
+    if (leds&pos) lightLink(led,input);
+    pos = pos << 1;
   }
+}
 
-  return pin;
+void DetachLeds(int leds)
+{
+  int pos = 1;
+          
+  for (int led=0; led<maxLights; led++) {
+    if (leds&pos) lightUnlink(led);
+    pos = pos << 1;
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -675,6 +798,28 @@ void runningFSM()
           
           PowerUpLeds(io);
           PowerDownLeds(ledsoff&~io);
+          break;
+
+      case _ATTACH:
+          Serial.print("ATTACH input:");
+          Serial.print(duration);
+          Serial.print(" cmds:");
+          printCmd(io);
+
+          AttachLeds(io,duration);
+
+          // prévoir la future extinction 
+          gSeq.leds |= ledsoff;
+          break;
+
+      case _DETACH:
+          Serial.print("DETACH cmds:");
+          printCmd(io);
+
+          DetachLeds(io);
+
+          // prévoir la future extinction 
+          gSeq.leds |= ledsoff;
           break;
 
       case _WAIT:

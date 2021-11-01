@@ -24,6 +24,8 @@
 #define WAIT(DELAI)           0,DELAI,_WAIT,
 #define WSTOP(IO,TIME)        IO,TIME,_WSTOP,
 #define PWM(IO,DUTY)          IO,DUTY,_PWM,
+#define ATTACH(IO,IN)         IO,IN,_ATTACH,
+#define DETACH(IO)            IO,0,_DETACH
 #define END                   0,0,_END,
 #define MARK                  0,0,_MARK,
 #define LOOP                  0,0,_LOOP,          
@@ -39,6 +41,7 @@
 #define S8    128
 #define S9    256
 #define S10   512
+#define SALL  1023
 
 // entrées à l'état Bas
 #define ESTARTB 0
