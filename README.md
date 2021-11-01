@@ -18,6 +18,7 @@ Les types d'éclairages actuellement supportés sont :
 - poste de soudure à l’arc, 
 - servo moteur 0-90° pour l’ouverture/fermeture d’une porte
 - gyrophare
+- bougie / brasero
 - feu clignotant qui ne clignote que s’il n’est pas permanent.
  
 
