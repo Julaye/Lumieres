@@ -29,7 +29,7 @@ Langage de programmation : C for Arduino Nano
 
 Langue du projet : Français / French
 
-Version pre-release : v20211030.6
+Version pre-release : v20211031
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
