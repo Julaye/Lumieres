@@ -30,7 +30,7 @@ Langage de programmation : C for Arduino Nano
 
 Langue du projet : Français / French
 
-Version pre-release : v20211101
+Version pre-release supportée : v20211101
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
@@ -46,6 +46,10 @@ La documentation proposée présente aussi dans son chapitre 9 de nombreux exemp
 Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la-lumiere-jaillisse/20889/
 
 ## Notes de version
+
+### v20211103 (in progress)
+- Revisite le systeme de trace avec info, verbose, debug et error
+- Clarifie l'usage d'une configuration de tests, dans le fichier idoine ConfigTests.h
 
 ### v20211101
 - Ajoute des commandes ATTACH et DETACH pour des automatismes encore plus simple avec la possibilité de lier la gestion d'une ou plusieurs sorties avec l'état d'une entrée.
