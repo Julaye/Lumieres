@@ -15,20 +15,20 @@
 //
 
 // ---------------------------------------------------------------------
-// --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE BATIMENT ---
+// --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE SCENE      ---
 
 // Affectation des types d'éclairage ou de fonctions à chaque sortie
 const byte ledCnf[] = {
- /* D2 */ ETYPE_NEONNEUF,   /* S1 (1)  : bureau administratif (IO) *
- /* D3 */ ETYPE_NEONNEUF,   /* S2 (2)  : accueil (PWM) */
- /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : bureau M. CLaude (IO) */
- /* D5 */ ETYPE_NEONNEUF,   /* S4 (8)  : couloir haut (PWM) */
- /* D6 */ ETYPE_NEONVIEUX,  /* S5 (16) : escalier (PWM) */
- /* D7 */ ETYPE_NEONNEUF,   /* S6 (32) : couloir bas (IO) */
- /* D8 */ ETYPE_NEONNEUF,   /* S7 (64) : bureau M. Gaston (IO) */
- /* D9 */ ETYPE_NEONNEUF,   /* S8 (128) ou SM1 : bureau secrétaire (PWM) */
- /* D10 */ ETYPE_STANDARD,  /* S9 (256) ou SM2 : bureau Mlle Pélerin (PWM) */
- /* D11 */ ETYPE_GYROPHARE  /* S10 (512) : gyrophare (PWM) */
+ /* D2 */ ETYPE_NEONNEUF,    /* S1 (1)  : bureau administratif (IO) *
+ /* D3 */ ETYPE_SOUDURE,     /* S2 (2)  : accueil (PWM) */
+ /* D4 */ ETYPE_STANDARD,    /* S3 (4)  : bureau M. CLaude (IO) */
+ /* D5 */ ETYPE_GYROPHARE,   /* S4 (8)  : couloir haut (PWM) */
+ /* D6 */ ETYPE_FIRE,        /* S5 (16) : escalier (PWM) */
+ /* D7 */ ETYPE_NEONNEUF,    /* S6 (32) : couloir bas (IO) */
+ /* D8 */ ETYPE_NEONNEUF,    /* S7 (64) : bureau M. Gaston (IO) */
+ /* D9 */ ETYPE_NEONVIEUX,   /* S8 (128) ou SM1 : bureau secrétaire (PWM) */
+ /* D10 */ ETYPE_STANDARD,   /* S9 (256) ou SM2 : bureau Mlle Pélerin (PWM) */
+ /* D11 */ ETYPE_GYROPHARE   /* S10 (512) : gyrophare (PWM) */
 };
 
 // Pour la commande d'un servo moteur sur la sortie D9 ou D10 uniquement

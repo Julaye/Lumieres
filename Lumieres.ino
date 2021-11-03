@@ -17,6 +17,7 @@
 //  v20211030.6 - Ajout de la commande PWM pour envoyer un signal sur les sorties compatibles
 //  v20211031 - optimisation des variables globales + macro langage pour faciliter l'écriture des automatismes (lisibilité)
 //  v20211101 - AJout des commandes ATTACH/DETACH qui permet de lier le cyle d'une ou plusieurs sorties avec l'état d'entrée
+//  v20211103 - Amélioration du systeme de trace, mise au points et tests de l'automate
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -63,23 +64,40 @@ const int PWM_FOR_LED = 64;
 #include "FSMLumieres.h"
 
 // ---------------------------------------------------------------------
-
-// mettre à 1 pour un debug dans la console série, 2 pour full debug
 //
-// ATTENTION : en debug, ce sont des séquences de mise au point qui sont
-// executées par l'automate - cf seqDebug1 et seqDebug2 dans le fichier
-// FSMLumieres.h, sur la base de chenillards
-const int debug = 0;
+// Système de mise au point
+//
+//  mettre en commentaire pour neutraliser la trace correspondante
+//
 
-// mettre à 1 pour rendre l'exécution de l'automate verbeux. C'est 
-// très utile quand on met au point sa séquence de commandes. Ce mode
-// affiche notamment l'état des sorties.
-const int verbose = 1;
+// Information de base
+#define DBG_ENABLE_INFO
 
+// Information de mise au point de vos automatismes
+#define DBG_ENABLE_VERBOSE
+
+// Information de mise au point de l'automate
+#define DBG_ENABLE_DEBUG
+
+// informations d'erreurs
+#define DBG_ENABLE_ERROR
+
+// Utilisation d'automatismes de tests (cf FSMLumieres.h)
+#define DBG_ENABLE_TESTS
+
+// ---------------------------------------------------------------------
+// Configuration des deux automatismes (mySeq1 et mySeq2)
+
+#ifdef DBG_ENABLE_TESTS
+#include "ConfigTests.h"
+#else
 // la configuration de votre automatisme se trouve dans ce fichier
 #include "ConfigLumieres.h"
+#endif
 
+// ---------------------------------------------------------------------
 // au besoin, structure pour piloter un servo moteur sur D9 ou D10
+
 #ifdef Servo_h
 Servo gServo;
 #endif
@@ -92,6 +110,10 @@ void initFSM()
 { 
   byte seq;
 
+  #ifdef DBG_ENABLE_VERBOSE
+    Serial.print("Init FSM ");
+  #endif
+  
   // Initialise l'automate de chaque sortie
   for (int i = 0 ; i < maxLights; i++) {
     gLight[i].stateRunning = estate_OFF;
@@ -100,16 +122,21 @@ void initFSM()
 
   // récupère la séquence pour le mode RUNNING
   seq = digitalRead(seqPin);
-  Serial.print("Séquence : ");
-  Serial.print(seq+1);
+
+  #ifdef DBG_ENABLE_INFO
+    Serial.print("Séquence : ");
+    Serial.print(seq+1);
+  #endif
   
-  if (debug) {
+  #ifdef DBG_ENABLE_DEBUG
     Serial.println(" - Debug");
-    (seq==LOW)?gpSeq=(int*)&seqDebug1:gpSeq=(int*)&seqDebug2;
-  } else {
-    Serial.println(" - Normal");
-    (seq==LOW)?gpSeq=(int*)&mySeq1:gpSeq=(int*)&mySeq2;
-  }
+  #else
+    #ifdef DBG_ENABLE_INFO
+      Serial.println(" - Normal");
+    #endif
+  #endif
+
+  (seq==LOW)?gpSeq=(int*)&mySeq1:gpSeq=(int*)&mySeq2;
 
   // mark par défaut sur le début de la séquence
   gpMarkSeq = gpSeq;
@@ -156,11 +183,13 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20211101 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20211103 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
-  Serial.print("HW RESET -> INIT seed:");
-  Serial.println(random());
+  #ifdef DBG_ENABLE_DEBUG
+    Serial.print("HW RESET -> INIT seed:");
+    Serial.println(random());
+  #endif
   initFSM();
  }
 
@@ -213,11 +242,11 @@ void unset(byte led)
     default: break;
   }
 
-  if (verbose) {
+  #ifdef DBG_ENABLE_VERBOSE
     int pos = (1 << led);
     mapLeds &= ~pos;
     displayLeds(true);
-  }
+  #endif
 }
 
 void set(byte led, int value)
@@ -239,11 +268,11 @@ void set(byte led, int value)
     default: break;
   }
 
-  if (verbose) {
+  #ifdef DBG_ENABLE_VERBOSE
     int pos = (1 << led);
     mapLeds |= pos;
     displayLeds(true);
-  }
+  #endif
 }
 
 // ---------------------------------------------------------------------
@@ -287,9 +316,11 @@ bool linkOff(byte led)
       // test la condition d'allumage
       r = (digitalRead(pin) == ((gLight[led].link&80)?LOW:HIGH));
       if (r) {
-        Serial.print("LINK in:");
-        Serial.print(pin);
-        Serial.println(" said --> state OFF");
+        #ifdef DBG_ENABLE_INFO
+          Serial.print("LINK in:");
+          Serial.print(pin);
+          Serial.println(" said --> state OFF");
+        #endif
         
         gLight[led].stateRunning = estate_OFF;
         return true;
@@ -313,9 +344,11 @@ bool linkOn(byte led)
       // test la condition d'allumage
       r = (digitalRead(pin) == ((gLight[led].link&80)?LOW:HIGH));
       if (!r) {
-        Serial.print("LINK in:");
-        Serial.print(pin);
-        Serial.println(" said --> state STPWRUP");
+        #ifdef DBG_ENABLE_INFO
+          Serial.print("LINK in:");
+          Serial.print(pin);
+          Serial.println(" said --> state STPWRUP");
+        #endif
         
         gLight[led].stateRunning = estate_STPWRUP;
         return true;
@@ -332,10 +365,16 @@ bool linkOn(byte led)
 // eteint les lumières
 void lightOff(byte led)
 {
-  if ((debug>1) && (gLight[led].stateRunning != estate_OFF)) Serial.println("estate_OFF");
-
   // la led est-elle liée à une entrée ? */
   if (linkOn(led)) return;
+
+  #ifdef DBG_ENABLE_DEBUG
+  if (gLight[led].stateRunning!=estate_OFF) {
+    Serial.print("lightOff(led:");
+    Serial.print(led);
+    Serial.println(") stateRunning<--OFF");
+  }
+  #endif
 
   if (ledCnf[led]==ETYPE_SERVO) {
     #ifdef Servo_h
@@ -354,11 +393,10 @@ void lightOff(byte led)
 // param est à true si l'allumage va être permanent
 void lightStartPowerUp(byte led,byte param=false)
 {
-
-  if (debug) {
+  #ifdef DBG_ENABLE_DEBUG
     Serial.print("state_STPWRUP led:");
     Serial.println(led);
-  }
+  #endif
 
   // si la led est déjà allumée, ne rien faire
   if (gLight[led].stateRunning == estate_ON) return;
@@ -371,7 +409,6 @@ void lightStartPowerUp(byte led,byte param=false)
         } else {
           gLight[led].param = param;
         }
-        if (debug>1) Serial.println("STANDARD -> state_ON");
         return;
 
     case ETYPE_NEONNEUF:
@@ -424,15 +461,19 @@ void lightStartPowerUp(byte led,byte param=false)
     case ETYPE_NOTUSED:
     default:
         gLight[led].stateRunning = estate_OFF;
-        if (debug) Serial.println("NOTUSED or UNKNOWN -> state_OFF");
+
+        #ifdef DBG_ENABLE_ERROR
+          Serial.print("Led ");
+          Serial.print(led);
+          Serial.print(" NOTUSED or UNKNOWN (ledCnf:");
+          Serial.print(ledCnf[led]);
+          Serial.println(") <-- state_OFF");
+        #endif
         return;    
   }
 
   // passe en mode démarrage
   gLight[led].stateRunning = estate_PWRUP;
-  if (debug>1) Serial.print("stateRunning(");
-  if (debug>1) Serial.print(led);
-  if (debug>1) Serial.println(")<-- PWRUP");
 
   // prépare la séquence
   gLight[led].statePwrup = 0;
@@ -444,13 +485,16 @@ void lightOn(byte led)
 {
     int alea;
 
+  #ifdef DBG_ENABLE_DEBUG
+  if (gLight[led].stateRunning!=estate_ON) {
+    Serial.print("lightOn(led:");
+    Serial.print(led);
+    Serial.println(") stateRunning<--ON");
+  }
+  #endif
+  
     // la led est-elle liée à une entrée ? */
     if (linkOff(led)) return;
-    
-    if (debug>1) {
-      Serial.print("state_ON led:");
-      Serial.println(led);
-    }
 
     switch (ledCnf[led]) {
       case ETYPE_STANDARD:
@@ -473,10 +517,11 @@ void lightOn(byte led)
       // ajuster la valeur random en fonction de la fréquence d'apparition (en ms)
       alea = random(0,10000);
       if (alea < 1) {
-        if (verbose) {
+        #ifdef DBG_ENABLE_DEBUG
           Serial.print("Glitch led:");
           Serial.println(led);
-        }
+        #endif
+        
         gLight[led].stateRunning = estate_PWRUP;
         gLight[led].statePwrup = INDEX_GLITCHPWRUP;
         gLight[led].stateDelay = 0;
@@ -487,15 +532,17 @@ void lightOn(byte led)
 // gère une séquence d'allumage
 void lightPowerUp(byte led)
 { 
+
+  #ifdef DBG_ENABLE_DEBUG
+  if (gLight[led].stateRunning!=estate_PWRUP) {
+    Serial.print("lightOn(led:");
+    Serial.print(led);
+    Serial.println(") stateRunning<--PWRUP");
+  }
+  #endif
+  
     // la led est-elle liée à une entrée ? */
     if (linkOff(led)) return;
-
-    if (debug>1) {
-      Serial.print("state_PWRUP led:");
-      Serial.print(led);
-      Serial.print(",delay:");
-      Serial.print(gLight[led].stateDelay);
-    }
 
     #ifdef Servo_h
     if (ledCnf[led]==ETYPE_SERVO) {
@@ -508,18 +555,7 @@ void lightPowerUp(byte led)
     // vérifier si le delai de la transition est écoulé
     if (gLight[led].stateDelay<=0) 
     { 
-        if (debug>1) {
-          Serial.print(led);
-          Serial.print("- Blink sequence:");
-          Serial.print(gLight[led].statePwrup);
-          Serial.print(" intensity: ");
-        }
-        
-        if (debug>1) Serial.print(gLight[led].pblink[gLight[led].statePwrup].intensity);
-
         gLight[led].stateDelay = gLight[led].pblink[gLight[led].statePwrup].duration;
-        if (debug>1) Serial.print(" duration: ");
-        if (debug>1) Serial.println(gLight[led].stateDelay);
 
         set(led,gLight[led].pblink[gLight[led].statePwrup].intensity);
         
@@ -529,7 +565,7 @@ void lightPowerUp(byte led)
           gLight[led].stateRunning = gLight[led].nextState;
         }
   }
-  if (debug>1) Serial.print(".");
+
   gLight[led].stateDelay--;
 }
 
@@ -541,12 +577,14 @@ void lightPowerUp(byte led)
 void lightLink(byte led, byte input)
 {
   gLight[led].link = input;
-  if (verbose) {
+
+  #ifdef DBG_ENABLE_VERBOSE
     Serial.print("Link led:");
     Serial.print(led);
     Serial.print(" with input:");
     Serial.println(input);
-  }
+  #endif
+  
   lightStartPowerUp(led);
 }
 
@@ -554,10 +592,12 @@ void lightLink(byte led, byte input)
 void lightUnlink(byte led)
 {
   gLight[led].link = LightNotLinked;
-  if (verbose) {
+
+  #ifdef DBG_ENABLE_VERBOSE
     Serial.print("UnLink led:");
     Serial.println(led);
-  }
+  #endif
+  
   lightOff(led);
 }
 
@@ -595,8 +635,12 @@ void fsmEclairage()
     
       case estate_ON : lightOn(led); break;
 
-      default: Serial.print("Unknown stateRunning led:"); Serial.print(led); Serial.print(" stateRunning:"); Serial.println(gLight[led].stateRunning); break;
-    
+      default: 
+        #ifdef DBG_ENABLE_ERROR
+          Serial.print("Unknown stateRunning led:"); Serial.print(led); Serial.print(" stateRunning:"); Serial.println(gLight[led].stateRunning);
+        #endif
+        break;
+        
     } // fin du switch
     
   } // pour chaque sortie
@@ -680,7 +724,9 @@ void runningFSM()
   // vérifie si le compteur de rappel est écoulé
   if (gSeq.duration<millis()) {
     // il est écoulé
-    Serial.print("NEXT ");
+    #ifdef DBG_ENABLE_INFO
+      Serial.print("NEXT ");
+    #endif
     
     // préserve les leds qu'il faudra peut être éteindre
     ledsoff = gSeq.leds;
@@ -696,21 +742,30 @@ void runningFSM()
     switch (commande) {
 
       case _END:
-          Serial.println("END -> STOP");
+          #ifdef DBG_ENABLE_INFO
+            Serial.println("END -> STOP");
+          #endif
+          
           gSeqState = STOP;
 
           PowerDownLeds(ledsoff&~io);
           break;
 
       case _MARK: /* place la mark pour un futur LOOP */
-          Serial.println("MARK");
+          #ifdef DBG_ENABLE_INFO
+            Serial.println("MARK");
+          #endif
+          
           gpMarkSeq = gpSeq-3;
         
           PowerDownLeds(ledsoff&~io);
           break;
 
       case _LOOP: /* retourne sur la marque */
-          Serial.println("LOOP");
+          #ifdef DBG_ENABLE_INFO
+            Serial.println("LOOP");
+          #endif
+          
           gpSeq = gpMarkSeq;
 
           PowerDownLeds(ledsoff&~io);
@@ -720,11 +775,13 @@ void runningFSM()
           r = random(1,duration)*60;
           gSeq.duration = millis() + r*1000;
           
-          Serial.print("STANDBY duration:");
-          Serial.print(r);
-          Serial.print(" s cmd:");
-          printCmd(io);
-
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("STANDBY duration:");
+            Serial.print(r);
+            Serial.print(" s cmd:");
+            printCmd(io);
+          #endif
+          
           // prévoir les extinction en même temps que le standby en cours
           gSeq.leds = io | ledsoff;
           
@@ -733,18 +790,22 @@ void runningFSM()
 
       case _PERM: 
           /* permanent : jusqu'à l'arrêt de l'Arduino ou le changement de séquence ou UNSET */
-          Serial.print("PERM cmd:");
-          printCmd(io);
-                    
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("PERM cmd:");
+            printCmd(io);
+          #endif
+                  
           PowerUpLeds(io,true);   
           PowerDownLeds(ledsoff&~io);
           break;
 
       case _PWM:
-          Serial.print("PWN duration:");
-          Serial.print(duration);
-          Serial.print(" s cmd:");
-          printCmd(io);
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("PWN duration:");
+            Serial.print(duration);
+            Serial.print(" s cmd:");
+            printCmd(io);
+          #endif
           
           /* envoie une commande PWM sur une sortie STANDARD supportant le PWM */
           PowerUpLeds(io,duration);
@@ -756,15 +817,18 @@ void runningFSM()
       case _ALEA:
           /* aléatoirement : permet de rendre aléatoire la présence d'une personne dans un bureau la nuit, aligné sur la commande STANDBY suivante ou PERM précédente */
           if (random(0,duration)==0) {
-            Serial.print("ALEA cmd:");
-            printCmd(io);
+            #ifdef DBG_ENABLE_INFO
+              Serial.print("ALEA cmd:");
+              printCmd(io);
+            #endif
             
             PowerUpLeds(io);
             gSeq.leds = io;
           } else {
-            Serial.print("ALEA NOPE cmd: ");
-            printCmd(io);
-
+            #ifdef DBG_ENABLE_INFO
+              Serial.print("ALEA NOPE cmd: ");
+              printCmd(io);
+            #endif
          }
           
           // pour standby à suivre, prévoir la future extinction en même temps que le standby en cours
@@ -775,11 +839,13 @@ void runningFSM()
       case _UNSET:
           gSeq.duration = millis() + duration*1000;
  
-          Serial.print("UNSET ");
-          Serial.print(duration);
-          Serial.print("s cmd: ");
-          printCmd(io);
-         
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("UNSET ");
+            Serial.print(duration);
+            Serial.print("s cmd: ");
+            printCmd(io);
+          #endif
+          
           PowerDownLeds(io | ledsoff);
           break;
             
@@ -791,21 +857,25 @@ void runningFSM()
           }
           gSeq.leds = io;
 
-          Serial.print("SET ");
-          Serial.print(duration);
-          Serial.print("s cmd: ");
-          printCmd(io);
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("SET ");
+            Serial.print(duration);
+            Serial.print("s cmd: ");
+            printCmd(io);
+          #endif
           
           PowerUpLeds(io);
           PowerDownLeds(ledsoff&~io);
           break;
 
       case _ATTACH:
-          Serial.print("ATTACH input:");
-          Serial.print(duration);
-          Serial.print(" cmds:");
-          printCmd(io);
-
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("ATTACH input:");
+            Serial.print(duration);
+            Serial.print(" cmds:");
+            printCmd(io);
+          #endif
+          
           AttachLeds(io,duration);
 
           // prévoir la future extinction 
@@ -813,9 +883,11 @@ void runningFSM()
           break;
 
       case _DETACH:
-          Serial.print("DETACH cmds:");
-          printCmd(io);
-
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("DETACH cmds:");
+            printCmd(io);
+          #endif
+          
           DetachLeds(io);
 
           // prévoir la future extinction 
@@ -828,8 +900,11 @@ void runningFSM()
           } else {
             gSeq.duration = millis() + duration*1000;
           }
-          Serial.print("WAIT ");
-          Serial.println(duration);
+
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("WAIT ");
+            Serial.println(duration);
+          #endif
           
           // prévoir les extinction en même temps que le wait en cours
           gSeq.leds = ledsoff;
@@ -849,12 +924,14 @@ void runningFSM()
           r = (digitalRead(pin) == ((io&80)?LOW:HIGH));
 
           // Un peu de blabla, c'est utile en mise au point de l'automatisme
-          Serial.print("WSTOP ");
-          Serial.print(duration);
-          Serial.print(" pin: ");
-          Serial.println(pin);
-          Serial.print(" val: ");
-          Serial.println(r);
+          #ifdef DBG_ENABLE_INFO
+            Serial.print("WSTOP ");
+            Serial.print(duration);
+            Serial.print(" pin: ");
+            Serial.print(pin);
+            Serial.print(" val: ");
+            Serial.println(r);
+          #endif
 
           // prévoir les extinction en même temps que le stop en cours
           gSeq.leds = ledsoff;
@@ -889,7 +966,9 @@ void loop() {
         if (rst!=gCurrentStateStartPin) {
           if (rst==false) gCurrentStateStartPin=false;
           if (rst==true) {
+            #ifdef DBG_ENABLE_INFO
             Serial.print("SW RESET -> INIT ");
+            #endif
             initFSM();
           }
         }
@@ -898,7 +977,9 @@ void loop() {
       
     case START: /* Vérifie que c'est un départ sous controle de l'entrée D14 ! */
       if ((digitalRead(startPin)==HIGH) && (gCurrentStateStartPin==false)) {
-        Serial.println("START");
+        #ifdef DBG_ENABLE_INFO
+          Serial.println("START");
+        #endif
         // fsmEclairage(); fait en entrée de loop() la première fois
 
         // on peut mettre la FSM dans le mode RUNNING
