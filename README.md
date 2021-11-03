@@ -19,8 +19,8 @@ Les types d'éclairages actuellement supportés sont :
 - servo moteur 0-90° pour l’ouverture/fermeture d’une porte
 - gyrophare
 - bougie / brasero
-- feu clignotant qui ne clignote que s’il n’est pas permanent.
- 
+- feu clignotant qui ne clignote que s’il n’est pas permanent,
+- Buzzer liée au poste de soudure à l'arc.
 
 Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
@@ -48,6 +48,7 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 ## Notes de version
 
 ### v20211103 (in progress)
+- type de sortie Buzzer (liée au poste soudage)
 - Revisite le systeme de trace avec info, verbose, debug et error
 - Clarifie l'usage d'une configuration de tests, dans le fichier idoine ConfigTests.h
 
