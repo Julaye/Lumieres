@@ -17,7 +17,7 @@
 //  v20211030.6 - Ajout de la commande PWM pour envoyer un signal sur les sorties compatibles
 //  v20211031 - optimisation des variables globales + macro langage pour faciliter l'écriture des automatismes (lisibilité)
 //  v20211101 - AJout des commandes ATTACH/DETACH qui permet de lier le cyle d'une ou plusieurs sorties avec l'état d'entrée
-//  v20211103 - Amélioration du systeme de trace, mise au points et tests de l'automate
+//  v20211103 - Amélioration du systeme de trace, mise au points et tests de l'automate + type de sortie Buzzer (liée au poste soudage)
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -299,7 +299,7 @@ int decodeInputPin(int io)
 }
 
 // ---------------------------------------------------------------------
-// Led liée à une entrée
+// sortie liée à une entrée ou à une autre sortie
 // ---------------------------------------------------------------------
 
 bool linkOff(byte led) 
@@ -357,6 +357,14 @@ bool linkOn(byte led)
     
     return false;
 }
+
+byte linkOut(byte typeled=ETYPE_BUZZER)
+{
+    for (int i=0; i<maxLights; i++) {
+      if (ledCnf[i]==typeled) return i;
+    }
+    return (byte)-1;
+}
  
 // ---------------------------------------------------------------------
 // Fonctions de support pour la FSM éclairage d'une led
@@ -368,6 +376,15 @@ void lightOff(byte led)
   // la led est-elle liée à une entrée ? */
   if (linkOn(led)) return;
 
+  if (ledCnf[led]==ETYPE_SERVO) {
+    #ifdef Servo_h    
+    gServo.write(0);
+    #endif
+  } else {
+    // eteint la led
+    unset(led);
+  }
+
   #ifdef DBG_ENABLE_DEBUG
   if (gLight[led].stateRunning!=estate_OFF) {
     Serial.print("lightOff(led:");
@@ -375,16 +392,7 @@ void lightOff(byte led)
     Serial.println(") stateRunning<--OFF");
   }
   #endif
-
-  if (ledCnf[led]==ETYPE_SERVO) {
-    #ifdef Servo_h
-    gServo.write(0);
-    #endif
-  } else {
-    // eteint la led
-    unset(led);
-  }
-  
+    
   // passe en mode démarrage (au cas où)
   gLight[led].stateRunning = estate_OFF;
 }
@@ -393,10 +401,12 @@ void lightOff(byte led)
 // param est à true si l'allumage va être permanent
 void lightStartPowerUp(byte led,byte param=false)
 {
-  #ifdef DBG_ENABLE_DEBUG
-    Serial.print("state_STPWRUP led:");
-    Serial.println(led);
-  #endif
+    byte buz;
+ 
+    #ifdef DBG_ENABLE_DEBUG
+      Serial.print("lightStartPowerUp led:");
+      Serial.println(led);
+    #endif
 
   // si la led est déjà allumée, ne rien faire
   if (gLight[led].stateRunning == estate_ON) return;
@@ -433,6 +443,17 @@ void lightStartPowerUp(byte led,byte param=false)
     case ETYPE_SOUDURE:
         gLight[led].pblink = (blink*)&blinkSoudure;
         gLight[led].maxblink = construitTableauSoudure();
+        gLight[led].nextState = estate_STPWRUP;
+
+        // buzzer linked out ?
+        buz = linkOut(ETYPE_BUZZER);
+        if (buz!=(byte)-1) {
+          gLight[buz].pblink = gLight[led].pblink;
+          gLight[buz].maxblink = gLight[led].maxblink;
+        }
+        break;
+
+    case ETYPE_BUZZER:
         gLight[led].nextState = estate_STPWRUP;
         break;
        
@@ -475,6 +496,14 @@ void lightStartPowerUp(byte led,byte param=false)
   // passe en mode démarrage
   gLight[led].stateRunning = estate_PWRUP;
 
+  #ifdef DBG_ENABLE_DEBUG
+  if (gLight[led].stateRunning!=estate_PWRUP) {
+    Serial.print("lightStartPowerUp led:");
+    Serial.print(led);
+    Serial.println(" stateRunning<--PWRUP");
+  }
+  #endif
+  
   // prépare la séquence
   gLight[led].statePwrup = 0;
   gLight[led].stateDelay = 0;
@@ -484,14 +513,6 @@ void lightStartPowerUp(byte led,byte param=false)
 void lightOn(byte led)
 {
     int alea;
-
-  #ifdef DBG_ENABLE_DEBUG
-  if (gLight[led].stateRunning!=estate_ON) {
-    Serial.print("lightOn(led:");
-    Serial.print(led);
-    Serial.println(") stateRunning<--ON");
-  }
-  #endif
   
     // la led est-elle liée à une entrée ? */
     if (linkOff(led)) return;
@@ -532,15 +553,6 @@ void lightOn(byte led)
 // gère une séquence d'allumage
 void lightPowerUp(byte led)
 { 
-
-  #ifdef DBG_ENABLE_DEBUG
-  if (gLight[led].stateRunning!=estate_PWRUP) {
-    Serial.print("lightOn(led:");
-    Serial.print(led);
-    Serial.println(") stateRunning<--PWRUP");
-  }
-  #endif
-  
     // la led est-elle liée à une entrée ? */
     if (linkOff(led)) return;
 
@@ -563,6 +575,13 @@ void lightPowerUp(byte led)
         if (gLight[led].statePwrup>=gLight[led].maxblink) { 
           gLight[led].statePwrup = 0;
           gLight[led].stateRunning = gLight[led].nextState;
+
+          #ifdef DBG_ENABLE_DEBUG
+            Serial.print("lightPowerUp led:");
+            Serial.print(led);
+            Serial.print(" stateRunning<--nextstate:");
+            Serial.println(gLight[led].stateRunning);          
+          #endif
         }
   }
 
