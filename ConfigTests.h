@@ -16,7 +16,7 @@ const byte ledCnf[] = {
  /* D6 */ ETYPE_FIRE,       /* S5 (16) : feu bougie ou braseo (PWM) */
  /* D7 */ ETYPE_NOTUSED,    /* S6 (32) : not used (IO) */
  /* D8 */ ETYPE_NOTUSED,    /* S7 (64) : not used (IO) */
- /* D9 */ ETYPE_NEONVIEUX,  /* S8 (128) ou SM1 : néon vieux avec des glitchs (PWM) */
+ /* D9 */ ETYPE_NEONVIEUX,  /* S8 (128) ou SM1 : néon vieux avec glitchs (PWM)  */
  /* D10 */ ETYPE_SERVO,     /* S9 (256) ou SM2 : Servo moteur (PWM) */
  /* D11 */ ETYPE_BUZZER     /* S10 (512) : Buzzer (PWM) */
 };
@@ -60,7 +60,7 @@ DEBUTSEQ(mySeq2)
     256,    10, _SET,
     512+2,  10, _SET,   /* Buzzer doit etre activité avec le poste soudure sinon bug */
     0,      10, _WAIT,  /* Attend pendant 10 secondes */
-    1019,   10, _SET,   /* Allume tout pendant 10 secondes */
+    1023-4-256,   10, _SET,   /* Allume tout pendant 10 secondes, sauf le servo et la sortie attachée */
     0,0,_WSTOP,
     LOOP
 FINSEQ(mySeq2)

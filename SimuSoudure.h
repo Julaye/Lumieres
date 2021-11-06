@@ -8,15 +8,14 @@
 // https://www.locoduino.org/spip.php?article90
 //
 
-//
 const byte Duree_flash_mini = 10 ;
-const byte Duree_flash_maxi = 101 ;
+const byte Duree_flash_maxi = 100 ;
 const byte Duree_int_mini = 10 ;
 const byte Duree_int_maxi = 31 ;
 const byte Nbre_even_mini = 10 ;
 const byte Nbre_even_maxi = 21 ;
 const int P_repos_mini = 1500 ;
-const int P_repos_maxi = 7000 ;
+const int P_repos_maxi = 6500 ;
 
 // le tableau va devoir etre construit avec l'algorithme
 // proposé par Locoduino ... facile

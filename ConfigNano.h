@@ -24,16 +24,16 @@ const byte LIGHT_OFF = 0;
 
 // Configuration du mode de chaque sortie (Arduino Nano)
 const byte outputMode[] = {
-            /* D2 */ MODE_IO,
-            /* D3 */ MODE_PWM,
-            /* D4 */ MODE_IO,
-            /* D5 */ MODE_PWM,
-            /* D6 */ MODE_PWM,
-            /* D7 */ MODE_IO,
-            /* D8 */ MODE_IO,
-            /* D9 */ MODE_PWM,
-            /* D10 */ MODE_PWM,
-            /* D11 */ MODE_PWM,
+    /* D2 : S1 */ MODE_IO,
+    /* D3 : S2 */ MODE_PWM,
+    /* D4 : S3 */ MODE_IO,
+    /* D5 : S4 */ MODE_PWM,
+    /* D6 : S5 */ MODE_PWM,
+    /* D7 : S6 */ MODE_IO,
+    /* D8 : S7 */ MODE_IO,
+    /* D9 : S8 ou SM1 */ MODE_PWM,
+    /* D10 : S9 ou SM2  */ MODE_PWM,
+    /* D11 : S10 */ MODE_PWM,
 };
 
 // Nombre maximum d'éclairages dans le tableau précédent
@@ -43,13 +43,13 @@ const byte outputMode[] = {
 const byte seqPin = 15;
 
 // Entrée digital D14 permettant de passer en RUN (1) ou en STOP (0)  (Pull-up)
-const int startPin = 14; 
+const int startPin = 14;  /* ESTARTB/ESTARTH selon l'état bas (STOP) ou haut (RUN) */
 
 // Entrées digitals utilisateur (Pull-Up)
-const byte inputUserPin1 = 16;
-const byte inputUserPin2 = 17;
-const byte inputUserPin3 = 18;
-const byte inputUserPin4 = 19;
+const byte inputUserPin1 = 16; /* E1B / E1H selon l'état bas ou haut */
+const byte inputUserPin2 = 17; /* E2B / E2H selon l'état bas ou haut */
+const byte inputUserPin3 = 18; /* E3B / E3H selon l'état bas ou haut */
+const byte inputUserPin4 = 19; /* E4B / E3H selon l'état bas ou haut */
 
 // Entrée pour le seed Generator
 const byte seedPin = 7;
