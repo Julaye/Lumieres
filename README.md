@@ -47,7 +47,7 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 
 ## Notes de version
 
-### v20211103 (in progress)
+### v2021110x (in progress)
 - type de sortie Buzzer (liée au poste soudage)
 - Revisite le systeme de trace avec info, verbose, debug et error
 - Clarifie l'usage d'une configuration de tests, dans le fichier idoine ConfigTests.h
