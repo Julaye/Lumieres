@@ -46,7 +46,7 @@
 // l'intensité maximum de chaque sortie PWM pour vos LEDs
 // à adapter en fonction de votre situation, entre 16 et 255 !
 // Ne pas oublier la résistance de 220 ohms pour les protéger
-const int PWM_FOR_LED = 64;
+const byte PWM_FOR_LED = 64;
 
 // l'intensité maximum de la sortie pour un buzzer
 const byte PWM_FOR_BUZZER = 255;
@@ -236,7 +236,7 @@ void printCmd(int leds,bool timing=false,char cmd=0x00)
 
   if (timing) {
     long int t = millis();
-    Serial.print("t");
+    Serial.print(" t");
     Serial.print((float)t/1000.0,2);
   }
 
@@ -266,9 +266,11 @@ void displayLeds(bool timing,char cmd)
 
 void unset(byte led)
 {
-  //Serial.print("unset ");
-  //Serial.println(led);
-  
+  #ifdef DBG_ENABLE_VERBOSE
+    Serial.print("unset led ");
+    Serial.print(led);
+  #endif
+
   switch (outputMode[led]) {
     case MODE_IO: digitalWrite(2+led,LOW); break;
     case MODE_PWM: analogWrite(2+led,0); break;
@@ -292,21 +294,23 @@ void set(byte led, int value)
     return;
   }
 
-  //Serial.print("set ");
-  //Serial.println(led);
+  #ifdef DBG_ENABLE_VERBOSE
+    Serial.print("set led ");
+    Serial.print(led);
+  #endif
 
   // indicateur que la séquence est vivante !
   digitalWrite(LED_BUILTIN,LOW);
   
   switch (outputMode[led]) {
     case MODE_IO: digitalWrite(2+led,HIGH); break;
-    case MODE_PWM: analogWrite(2+led,value); break;
-//      if (ledCnf[led]==ETYPE_BUZZER) {
-//        analogWrite(2+led,PWM_FOR_BUZZER);
-//      } else {
-//        analogWrite(2+led,value);
-//      }
-//      break;
+    case MODE_PWM: //analogWrite(2+led,value); break;
+      if (ledCnf[led]==ETYPE_BUZZER) {
+        analogWrite(2+led,PWM_FOR_BUZZER);
+      } else {
+        analogWrite(2+led,value);
+      }
+      break;
       
     default: break;
   }
