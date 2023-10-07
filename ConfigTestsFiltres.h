@@ -28,8 +28,7 @@ const byte ledCnf[] = {
 // Des séquences a pour tester le programme et/ou tester les éclairages
 // ---------------------------------------------------------------------
 
-// Séquence 1 : un simple chenillard sur les sorties D2, D4 et D9 , c'est bien !
-// Je mixe volontairement macro langage et structure de données
+// Séquence 1 : Sorties en fonction de la rétro (détection loco)
 DEBUTSEQ(mySeq1)
   1, E1B, _ATTACH,  /* utile pour tester l'anti-rebond ... */
   4, E3B, _ATTACH,  /* utile pour tester l'anti-rebond ... */
@@ -40,15 +39,13 @@ DEBUTSEQ(mySeq1)
   LOOP          /* boucle pour flasher à nouveau */
 FINSEQ(mySeq1)
 
-// Séquence 2 :  un chenillard sur l'ensemble des sorties, c'est encore mieux !
-// A noter que la sortie S3 (broche D4) est reliée à l'entrée E1B, mettre cette 
-// entrée à 0 pour lancer le gyrophare
+// Séquence 2 : Sorties en fonction de la rétro (non détection loco)
 DEBUTSEQ(mySeq2)
-  1, E1B, _ATTACH,  /* utile pour tester l'anti-rebond ... */
-  4, E3B, _ATTACH,  /* utile pour tester l'anti-rebond ... */
-  8, E4B, _ATTACH,  /* utile pour tester l'anti-rebond ... */
+  1, E1H, _ATTACH,  /* utile pour tester l'anti-rebond ... */
+  4, E3H, _ATTACH,  /* utile pour tester l'anti-rebond ... */
+  8, E4H, _ATTACH,  /* utile pour tester l'anti-rebond ... */
   MARK          /* point de retour de l’automatisme */  
-  WSTOP(E2B,1)  /* attend la détection d’une locomotive sur l’entrée E2 */
+  WSTOP(E2H,1)  /* attend la non détection d’une locomotive sur l’entrée E2 */
   ALEA(S2,4)    /* lance le flash configuré sur la sortie S2 aléatoirement (0..3) */
   LOOP          /* boucle pour flasher à nouveau */
 FINSEQ(mySeq2)
