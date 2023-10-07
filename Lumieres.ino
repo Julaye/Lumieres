@@ -95,7 +95,9 @@ const byte PWM_FOR_BUZZER = 255;
 // Configuration des deux automatismes (mySeq1 et mySeq2)
 
 #ifdef DBG_ENABLE_TESTS
-#include "ConfigTests.h"
+// activer un seul fichier en fonction des tests à faire
+//#include "ConfigTests.h"
+#include "ConfigTestsFiltres.h"
 #else
 // la configuration de votre automatisme se trouve dans ce fichier
 #include "ConfigLumieres.h"

@@ -10,7 +10,7 @@
 const byte ledCnf[] = {
  /* D2 */ ETYPE_NEONNEUF,   /* S1 (1)  : néon neuf sur une sortie standard (IO) *
  /* D3 */ ETYPE_SOUDURE,    /* S2 (2)  : poste de soudure (PWM) */
- /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) */
+ /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) *//Users/juliedumortier/Documents/L'héritière d'Obourg/Arduino/Lumieres/ConfigTestsFiltres.h
  /* D5 */ ETYPE_GYROPHARE,  /* S4 (8)  : gyrophare (PWM) */
  /* D6 */ ETYPE_FIRE,       /* S5 (16) : feu bougie ou braseo (PWM) */
  /* D7 */ ETYPE_NOTUSED,    /* S6 (32) : not used (IO) */
@@ -44,7 +44,7 @@ DEBUTSEQ(mySeq1)
 FINSEQ(mySeq1)
 
 // Séquence 2 :  un chenillard sur l'ensemble des sorties, c'est encore mieux !
-// A noter que la sortie S4 (broche D5) est reliée à l'entrée E1B, mettre cette 
+// A noter que la sortie S3 (broche D4) est reliée à l'entrée E1B, mettre cette 
 // entrée à 0 pour lancer le gyrophare
 DEBUTSEQ(mySeq2)
     4,     E1B, _ATTACH,  /* utile pour tester l'anti-rebond ... */
