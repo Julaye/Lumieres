@@ -16,9 +16,11 @@
 //  v20211030.5 - Ajout du type Clignotant, éclairage qui ne clignote que s'il n'est pas permanent !
 //  v20211030.6 - Ajout de la commande PWM pour envoyer un signal sur les sorties compatibles
 //  v20211031 - optimisation des variables globales + macro langage pour faciliter l'écriture des automatismes (lisibilité)
-//  v20211101 - AJout des commandes ATTACH/DETACH qui permet de lier le cyle d'une ou plusieurs sorties avec l'état d'entrée
+//  v20211101 - Ajout des commandes ATTACH/DETACH qui permet de lier le cyle d'une ou plusieurs sorties avec l'état d'entrée
 //  v20211103 - Amélioration du systeme de trace, mise au points et tests de l'automate + type de sortie Buzzer (liée au poste soudage)
 //  v20211107 - Better traces + some buzzer testing + SERVO usage impact D9 (S8) & D10 (S9) pins not working with PWM
+//  v20230913 - Ajout d'un filtre anti-rebond sur les entrées (non publié)
+//  v2023100x - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -208,7 +210,7 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20211103 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20231007 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   #ifdef DBG_ENABLE_DEBUG
@@ -386,7 +388,7 @@ bool linkOff(byte led)
       io = gLight[led].link&0x7F;
 
       // test la condition d'allumage
-      r = (inputState[io] == ((gLight[led].link&80)?LOW:HIGH));
+      r = (inputState[io] == ((gLight[led].link&0x80)?LOW:HIGH));
       if (r) {
         #ifdef DBG_ENABLE_INFO
           Serial.print("LINK input E");
@@ -414,7 +416,7 @@ bool linkOn(byte led)
       io = gLight[led].link&0x7F;
 
       // test la condition d'allumage
-      r = (inputState[io] == ((gLight[led].link&80)?LOW:HIGH));
+      r = (inputState[io] == ((gLight[led].link&0x80)?LOW:HIGH));
       if (!r) {
         #ifdef DBG_ENABLE_INFO
           Serial.print("LINK input E");
@@ -830,7 +832,7 @@ void runningFSM()
     // préserve les leds qu'il faudra peut être éteindre
     ledsoff = gSeq.leds;
 
-     gSeq.leds = 0;
+    gSeq.leds = 0;
     
     /* lit la séquence suivante */
     io = *gpSeq++;
@@ -1017,7 +1019,7 @@ void runningFSM()
           }
 
           // test la condition d'arret du STOP
-          r = (inputState[io] == ((io&80)?LOW:HIGH));
+          r = (inputState[io&0x7F] == ((io&0x80)?LOW:HIGH));
 
           // Un peu de blabla, c'est utile en mise au point de l'automatisme
           #ifdef DBG_ENABLE_INFO
