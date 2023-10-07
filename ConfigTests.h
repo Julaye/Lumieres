@@ -50,17 +50,7 @@ FINSEQ(mySeq1)
 DEBUTSEQ(mySeq2)
     4,     E1B, _ATTACH,
     MARK
-    1,      10, _SET,
-    2,      10, _SET,
-    8,      10, _SET,
-    16,     10, _SET,
-    32,     10, _SET,
-    64,     10, _SET,
-    128,    10, _SET,
-    256,    10, _SET,
-    512+2,  10, _SET,   /* Buzzer doit etre activité avec le poste soudure sinon bug */
-    0,      10, _WAIT,  /* Attend pendant 10 secondes */
-    1023-4-256,   10, _SET,   /* Allume tout pendant 10 secondes, sauf le servo et la sortie attachée */
+// -    1023-4-256,   10, _SET,   /* Allume tout pendant 10 secondes, sauf le servo et la sortie attachée */
     0,0,_WSTOP,
     LOOP
 FINSEQ(mySeq2)

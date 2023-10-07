@@ -44,3 +44,7 @@ struct {
     int leds;           /* leds concernés par la transition */
     byte command;       /* commande associée */
 } gSeq;
+
+// anti rebond des entrées
+byte inputState[maxInputPins];
+byte inputCount[maxInputPins];

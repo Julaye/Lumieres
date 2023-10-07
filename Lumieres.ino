@@ -133,10 +133,18 @@ void initFSM()
   #endif
   
   #ifdef DBG_ENABLE_DEBUG
-    Serial.println(" - Debug");
+    Serial.print(" - Debug");
   #else
     #ifdef DBG_ENABLE_INFO
-      Serial.println(" - Normal");
+      Serial.print(" - Normal");
+    #endif
+  #endif
+
+  #ifdef DBG_ENABLE_TESTS
+    Serial.println(" - ConfigTests.h");
+  #else
+    #ifdef DBG_ENABLE_INFO
+      Serial.println(" - ConfigLumieres.h");
     #endif
   #endif
 
@@ -176,12 +184,25 @@ void setup() {
 
   // pin pour démarrer / stopper la FSM générale
   pinMode(startPin,INPUT_PULLUP);
+  inputState[0] = digitalRead(startPin);
+  inputCount[0] = maxFiltre;
 
   // 4 entrées utilisateurs
   pinMode(inputUserPin1,INPUT_PULLUP);
+  inputState[1] = digitalRead(inputUserPin1);
+  inputCount[1] = maxFiltre;
+  
   pinMode(inputUserPin2,INPUT_PULLUP);
+  inputState[2] = digitalRead(inputUserPin2);
+  inputCount[2] = maxFiltre;
+  
   pinMode(inputUserPin3,INPUT_PULLUP);
+  inputState[3] = digitalRead(inputUserPin3);
+  inputCount[3] = maxFiltre;
+
   pinMode(inputUserPin4,INPUT_PULLUP);
+  inputState[4] = digitalRead(inputUserPin4);
+  inputCount[4] = maxFiltre;
 
   // la germe du générateur aléatoire
   randomSeed(analogRead(seedPin));
@@ -299,7 +320,7 @@ void set(byte led, int value)
 // de la commande
 // ---------------------------------------------------------------------
 
-int decodeInputPin(int io)
+byte decodeInputPin(int io)
 {
   byte pin;
 
@@ -317,26 +338,59 @@ int decodeInputPin(int io)
 }
 
 // ---------------------------------------------------------------------
+// updateInput(io)
+//  met à jour l'état de l'entrée en gérant l'anti-rebond (filtre)
+// ---------------------------------------------------------------------
+
+bool updateInput(int io)
+{
+  byte pin;
+  bool r;
+
+  // lecture de la valeur courante
+  pin = decodeInputPin(io);
+  r = digitalRead(pin);
+
+  // si l'état précédent est différent -> déclenche le filtre
+  if (inputState[io]!=r) {
+    if (inputCount[io]=0) {
+      // le filtre a fait son job
+      inputState[io] = r;         // garde le nouvel état
+      inputCount[io] = maxFiltre; // relance le filtre
+    } else {
+      // le filtre doit faire son job
+      inputCount[io]--;
+    }     
+  } else {
+    // l'entrée n'a pas changé d'état depuis la dernière mise à jour
+    inputCount[io] = maxFiltre;  // relance le filtre
+  }
+
+  // retourne l'état filtré
+  return inputState[io];
+}
+
+// ---------------------------------------------------------------------
 // sortie liée à une entrée ou à une autre sortie
 // ---------------------------------------------------------------------
 
 bool linkOff(byte led) 
 {
-    byte pin;
+    byte io;
     bool r;
     
     // la led est-elle liée à une entrée ? */
     if (gLight[led].link != LightNotLinked) {
 
       // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
-      pin = decodeInputPin(gLight[led].link);
+      io = gLight[led].link&0x7F;
 
       // test la condition d'allumage
-      r = (digitalRead(pin) == ((gLight[led].link&80)?LOW:HIGH));
+      r = (inputState[io] == ((gLight[led].link&80)?LOW:HIGH));
       if (r) {
         #ifdef DBG_ENABLE_INFO
           Serial.print("LINK input E");
-          Serial.print(gLight[led].link);
+          Serial.print(io);
           Serial.println(" said --> state OFF");
         #endif
         
@@ -350,21 +404,21 @@ bool linkOff(byte led)
 
 bool linkOn(byte led) 
 {
-    byte pin;
+    byte io;
     bool r;
     
     // la led est-elle liée à une entrée ? */
     if (gLight[led].link != LightNotLinked) {
 
       // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
-      pin = decodeInputPin(gLight[led].link);
+      io = gLight[led].link&0x7F;
 
       // test la condition d'allumage
-      r = (digitalRead(pin) == ((gLight[led].link&80)?LOW:HIGH));
+      r = (inputState[io] == ((gLight[led].link&80)?LOW:HIGH));
       if (!r) {
         #ifdef DBG_ENABLE_INFO
           Serial.print("LINK input E");
-          Serial.print(gLight[led].link);
+          Serial.print(io);
           Serial.println(" said --> state STPWRUP");
         #endif
         
@@ -635,6 +689,15 @@ void lightUnlink(byte led)
 }
 
 // ---------------------------------------------------------------------
+// updateInputs()
+// ---------------------------------------------------------------------
+
+void updateInputs()
+{
+  for (int io=0; io<maxInputPins; io++) updateInput(io);
+}
+
+// ---------------------------------------------------------------------
 // fsmEclairage() est l'automate pour gérer un éclairage selon son état
 //  OFF     : éteint
 //  STPWRUP : début d'allumage si pas déjà allumé
@@ -677,6 +740,9 @@ void fsmEclairage()
     } // fin du switch
     
   } // pour chaque sortie
+
+  // lecture des entrées
+  updateInputs();
 
   // base de temps de nos FSM : la milliseconde (précision sommaire)
   delay(1);
@@ -950,11 +1016,8 @@ void runningFSM()
             gSeq.duration = millis() + duration*1000;
           }
 
-          // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
-          pin = decodeInputPin(io);
-
           // test la condition d'arret du STOP
-          r = (digitalRead(pin) == ((io&80)?LOW:HIGH));
+          r = (inputState[io] == ((io&80)?LOW:HIGH));
 
           // Un peu de blabla, c'est utile en mise au point de l'automatisme
           #ifdef DBG_ENABLE_INFO
@@ -994,7 +1057,7 @@ void loop() {
   switch (gSeqState) {
     case STOP : /* la machine est stoppée et ne peut redémarrer que sur une nouvelle sollicitation */
       {
-        bool rst = (digitalRead(startPin) == HIGH);
+        bool rst = (inputState[0] == HIGH);
       
         if (rst!=gCurrentStateStartPin) {
           if (rst==false) gCurrentStateStartPin=false;
@@ -1009,7 +1072,7 @@ void loop() {
       return;
       
     case START: /* Vérifie que c'est un départ sous controle de l'entrée D14 ! */
-      if ((digitalRead(startPin)==HIGH) && (gCurrentStateStartPin==false)) {
+      if ((inputState[0]==HIGH) && (gCurrentStateStartPin==false)) {
         #ifdef DBG_ENABLE_INFO
           Serial.println("START");
         #endif
