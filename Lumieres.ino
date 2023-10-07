@@ -20,7 +20,7 @@
 //  v20211103 - Amélioration du systeme de trace, mise au points et tests de l'automate + type de sortie Buzzer (liée au poste soudage)
 //  v20211107 - Better traces + some buzzer testing + SERVO usage impact D9 (S8) & D10 (S9) pins not working with PWM
 //  v20230913 - Ajout d'un filtre anti-rebond sur les entrées (non publié)
-//  v2023100x - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires
+//  v2023100x - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires + Traces
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -80,7 +80,7 @@ const byte PWM_FOR_BUZZER = 255;
 #define DBG_ENABLE_INFO
 
 // Information de mise au point de vos automatismes
-//#define DBG_ENABLE_VERBOSE
+#define DBG_ENABLE_VERBOSE
 
 // Information de mise au point de l'automate
 //#define DBG_ENABLE_DEBUG
@@ -344,6 +344,32 @@ byte decodeInputPin(int io)
 //  met à jour l'état de l'entrée en gérant l'anti-rebond (filtre)
 // ---------------------------------------------------------------------
 
+#ifdef DBG_ENABLE_VERBOSE
+int mapInputs = 0;
+int prevInputs = 0;
+
+void displayInputs()
+{
+  int pos = 1;
+
+  mapInputs = 0;
+  for (int i=0 ; i < maxInputPins; i++) {
+    mapInputs += (inputState[i] << i);
+  }
+
+  if (mapInputs!=prevInputs) {
+    prevInputs = mapInputs;
+  
+    Serial.print(" INPUTS[");
+    for (int i=0 ; i < maxInputPins; i++) {
+      if (mapInputs&pos) Serial.print(" X"); else Serial.print(" _");
+      pos = pos << 1 ;
+    }
+    Serial.println(" ] ");
+  } 
+}
+#endif
+
 bool updateInput(int io)
 {
   byte pin;
@@ -367,6 +393,10 @@ bool updateInput(int io)
     // l'entrée n'a pas changé d'état depuis la dernière mise à jour
     inputCount[io] = maxFiltre;  // relance le filtre
   }
+
+  #ifdef DBG_ENABLE_VERBOSE
+    displayInputs();
+  #endif
 
   // retourne l'état filtré
   return inputState[io];

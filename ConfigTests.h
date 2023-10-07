@@ -47,7 +47,7 @@ FINSEQ(mySeq1)
 // A noter que la sortie S4 (broche D5) est reliée à l'entrée E1B, mettre cette 
 // entrée à 0 pour lancer le gyrophare
 DEBUTSEQ(mySeq2)
-    4,     E1B, _ATTACH,
+    4,     E1B, _ATTACH,  /* utile pour tester l'anti-rebond ... */
     MARK
     1,      10, _SET,
     2,      10, _SET,
