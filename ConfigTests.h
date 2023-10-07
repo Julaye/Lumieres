@@ -10,7 +10,7 @@
 const byte ledCnf[] = {
  /* D2 */ ETYPE_NEONNEUF,   /* S1 (1)  : néon neuf sur une sortie standard (IO) *
  /* D3 */ ETYPE_SOUDURE,    /* S2 (2)  : poste de soudure (PWM) */
- /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) *//Users/juliedumortier/Documents/L'héritière d'Obourg/Arduino/Lumieres/ConfigTestsFiltres.h
+ /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) */
  /* D5 */ ETYPE_GYROPHARE,  /* S4 (8)  : gyrophare (PWM) */
  /* D6 */ ETYPE_FIRE,       /* S5 (16) : feu bougie ou braseo (PWM) */
  /* D7 */ ETYPE_NOTUSED,    /* S6 (32) : not used (IO) */
