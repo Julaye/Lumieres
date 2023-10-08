@@ -2,7 +2,7 @@
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
 // Ce fichier concerne la suite des allumages et extinctions qu'il 
-// faut envoyer à une led pour simuler un néon
+// faut envoyer à une led pour simuler un néon avec ou sans glitch
 //
 
 const blink blinkNeon[] = {

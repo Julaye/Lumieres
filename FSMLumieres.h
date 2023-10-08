@@ -1,8 +1,10 @@
 // Lumieres::FSMlumieres.h
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
-// Ce fichier concerne la machine à état fini pour gérer le batiment, la scène
+// Ce fichier concerne la machine à état fini pour gérer l'automatisme, la scène
 // et plus généralement un ensemble d'éclairages
+
+// === En principe vous n'avez pas à modifier ce fichier =======================
 
 // Pour définir une séquence, on doit pour chaque éclairage définir une durée
 // d'allumage avant extinction, et il existe des commandes particulières :

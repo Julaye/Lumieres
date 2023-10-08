@@ -1,7 +1,8 @@
 // Lumieres::ConfigTestsFiltres.h
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
-// Ce fichier concerne la configuration de scènes de tests pour Filtres
+// Ce fichier concerne la configuration de scènes de tests pour la
+// fonctionnalité de filtrage anti-rebond
 //
 // ---------------------------------------------------------------------
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOS TESTS       ---

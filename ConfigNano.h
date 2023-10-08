@@ -2,11 +2,15 @@
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
 // Ce fichier concerne la configuration matérielle utilisée pour gérer 
-// les éclairages d'un batiment avec un Arduino Nano
+// les automatismes (éclairages, servo, ...) avec un Arduino Nano
 //
 // Les éléments qui suivent sont spécifiques à l'Arduino Nano et ne
 // doivent être modifié que pour supporter une carte différente
+//
+// A noter que ce code est optimisé pour la platine Obourg v2 que
+// l'on peut découvrir ici : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la-lumiere-jaillisse/20889/
 
+//
 // mode des sorties : PWM ou IO 
 // -> attention l'intensité n'est pas réglable en IO, protéger avec une 
 //    résistance en fonction de la led utilisée
@@ -51,6 +55,7 @@ const byte inputUserPin2 = 17; /* E2B / E2H selon l'état bas ou haut */
 const byte inputUserPin3 = 18; /* E3B / E3H selon l'état bas ou haut */
 const byte inputUserPin4 = 19; /* E4B / E3H selon l'état bas ou haut */
 
+// Anti-rebond optimisé pour la rétro-signalisation Marklin C / Platine Obourg v2
 const byte maxInputPins  = 5; /* nombre d'entrées à gérer en anti-rebond */
 const byte maxFiltreH = 8;    /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 1 -> 0 */
 const byte maxFiltreB = 512;  /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 0 -> 1 */

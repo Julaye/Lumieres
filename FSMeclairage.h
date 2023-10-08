@@ -4,6 +4,8 @@
 // Ce fichier concerne la machine à état fini pour gérer un éclairage
 //
 
+// === En principe vous n'avez pas à modifier ce fichier =======================
+
 // type d'éclairage
 const byte ETYPE_STANDARD  = 0;
 const byte ETYPE_NEONNEUF  = 1;

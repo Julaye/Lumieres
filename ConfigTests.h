@@ -1,10 +1,11 @@
 // Lumieres::ConfigTests.h
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
-// Ce fichier concerne la configuration de scènes de tests
+// Ce fichier concerne la configuration de scènes de tests, à adapter
+//  selon votre environnement de test.
 //
 // ---------------------------------------------------------------------
-// --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOS TESTS       ---
+// --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOS TESTS        ---
 
 // Affectation des types d'éclairage ou de fonctions à chaque sortie
 const byte ledCnf[] = {

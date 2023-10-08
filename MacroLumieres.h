@@ -1,7 +1,7 @@
 // Lumieres::ConfigLumieres.h
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
-// Ce fichier propose un macro langage pour facilier l'écriture d'automatismes
+// Ce fichier propose un macro langage pour faciliter l'écriture d'automatismes
 // Se reporter à la documentation
 // ---------------------------------------------------------------------------
 

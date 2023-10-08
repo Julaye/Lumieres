@@ -6,7 +6,6 @@
 //
 // Je me suis inspirée du programme proposé par Locoduino ici :
 // https://www.locoduino.org/spip.php?article90
-//
 
 const byte Duree_flash_mini = 10 ;
 const byte Duree_flash_maxi = 100 ;

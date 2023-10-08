@@ -4,15 +4,17 @@
 // Ce fichier concerne la configuration de votre scène, soit de 
 // l'ensemble des éclairages ou sorties que vous souhaitez commander.
 //
-// il contient le mapping entre sorties de l'Arduino et type d'éclairages 
-// ainsi que les deux séquences executées par l'automate fini.
+// il contient le mapping entre sorties physiques de l'Arduino et sorties
+// logiques (éclairages, servo, buzzer ...) ainsi que les deux séquences 
+// executées par l'automate à état fini.
 //
 // Le programme est livré avec la configuration du batiment administratif
-// du dépot diesel appartenant à notre Mlle Pélerin
+// du dépot diesel appartenant à notre Mlle Pélerin, projet Obourg
 //
 // Plus d'exemples dans la documention, notamment pour les fonctions les
 // avancées comme le poste de soudure, le flash du photographe, ...
 //
+// === Ce fichier est à adapter en fonction de vos automatismes ========
 
 // ---------------------------------------------------------------------
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE SCENE      ---

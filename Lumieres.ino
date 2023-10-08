@@ -1,7 +1,7 @@
 // Lumieres
 // Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
-// La gestion d'un batiment, d'une scène, d'un ensemble d'éclairages avec un petit Arduino Nano
+// La gestion d'un batiment, d'une scène, d'un ensemble d'éclairages et automatismes avec un petit Arduino Nano
 //
 // Historique des versions (résumé)
 //  v20211027 - première implémentation, mise au point, mode debug
@@ -20,7 +20,7 @@
 //  v20211103 - Amélioration du systeme de trace, mise au points et tests de l'automate + type de sortie Buzzer (liée au poste soudage)
 //  v20211107 - Better traces + some buzzer testing + SERVO usage impact D9 (S8) & D10 (S9) pins not working with PWM
 //  v20230913 - Ajout d'un filtre anti-rebond sur les entrées (non publié)
-//  v2023100x - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires + Traces
+//  v20231008 - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires + Traces
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
