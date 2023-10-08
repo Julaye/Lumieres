@@ -43,13 +43,17 @@ const byte outputMode[] = {
 const byte seqPin = 15;
 
 // Entrée digital D14 permettant de passer en RUN (1) ou en STOP (0)  (Pull-up)
-const int startPin = 14;  /* ESTARTB/ESTARTH selon l'état bas (STOP) ou haut (RUN) */
+const int startPin = 14;       /* ESTARTB/ESTARTH selon l'état bas (STOP) ou haut (RUN) */
 
 // Entrées digitals utilisateur (Pull-Up)
 const byte inputUserPin1 = 16; /* E1B / E1H selon l'état bas ou haut */
 const byte inputUserPin2 = 17; /* E2B / E2H selon l'état bas ou haut */
 const byte inputUserPin3 = 18; /* E3B / E3H selon l'état bas ou haut */
 const byte inputUserPin4 = 19; /* E4B / E3H selon l'état bas ou haut */
+
+const byte maxInputPins  = 5; /* nombre d'entrées à gérer en anti-rebond */
+const byte maxFiltreH = 192;  /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 1 -> 0 */
+const byte maxFiltreB = 512;  /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 0 -> 1 */
 
 // Entrée pour le seed Generator
 const byte seedPin = 7;

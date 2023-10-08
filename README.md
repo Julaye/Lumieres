@@ -20,7 +20,7 @@ Les types d'éclairages actuellement supportés sont :
 - gyrophare
 - bougie / brasero
 - feu clignotant qui ne clignote que s’il n’est pas permanent,
-- Buzzer liée au poste de soudure à l'arc.
+(- Buzzer liée au poste de soudure à l'arc. --> BOF)
 
 Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
@@ -30,7 +30,7 @@ Langage de programmation : C for Arduino Nano
 
 Langue du projet : Français / French
 
-Version pre-release supportée : v20211101
+Version pre-release supportée : v2023100x
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
@@ -47,8 +47,12 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 
 ## Notes de version
 
-### v2021110x (in progress)
-- type de sortie Buzzer (liée au poste soudage)
+### v2023100x
+- Anti-rebond sur les entrées (pour pouvoir utiliser des entrées de rétro-signalisation)
+- Fichier spécifique (ConfigTestsFiltres.h) pour tester l'anti-rebond
+
+### v2021110x
+- type de sortie Buzzer (liée au poste soudage), résultat très bof
 - Revisite le systeme de trace avec info, verbose, debug et error
 - Clarifie l'usage d'une configuration de tests, dans le fichier idoine ConfigTests.h
 

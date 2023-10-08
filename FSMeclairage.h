@@ -12,7 +12,7 @@ const byte ETYPE_GYROPHARE = 3;
 const byte ETYPE_FLASH     = 4;
 const byte ETYPE_SOUDURE   = 5; /* un seul Poste de soudure par Arduino */
 const byte ETYPE_FIRE      = 6; /* une seule simulation de feu par Arduino */
-const byte ETYPE_CLIGNOTANT= 7; /* éclairage qui ne clignote que s'il n'est pas permanent !*/
+const byte ETYPE_CLIGNOTANT= 7; /* éclairage qui ne clignote que s'il n'est pas permanent ! */
 
 const byte ETYPE_BUZZER    = 8; /* un seul buzzer par Arduino - se lie automatiauement au Poste de soudure si présent */
 
