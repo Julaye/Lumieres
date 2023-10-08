@@ -80,7 +80,7 @@ const byte PWM_FOR_BUZZER = 255;
 #define DBG_ENABLE_INFO
 
 // Information de mise au point de vos automatismes
-#define DBG_ENABLE_VERBOSE
+//#define DBG_ENABLE_VERBOSE
 
 // Information de mise au point de l'automate
 //#define DBG_ENABLE_DEBUG
@@ -266,7 +266,7 @@ void displayLeds(bool timing,char cmd)
 
 void unset(byte led)
 {
-  #ifdef DBG_ENABLE_VERBOSE
+  #ifdef DBG_ENABLE_DEBUG
     Serial.print("unset led ");
     Serial.print(led);
   #endif
@@ -294,7 +294,7 @@ void set(byte led, int value)
     return;
   }
 
-  #ifdef DBG_ENABLE_VERBOSE
+  #ifdef DBG_ENABLE_DEBUG
     Serial.print("set led ");
     Serial.print(led);
   #endif
@@ -387,7 +387,7 @@ bool updateInput(int io)
 
   // si l'état précédent est différent -> déclenche le filtre
   if (inputState[io]!=r) {
-    if (inputCount[io]=0) {
+    if (inputCount[io]==0) {
       // le filtre a fait son job
       inputState[io] = r;         // garde le nouvel état
       inputCount[io] = maxFiltre; // relance le filtre
@@ -707,7 +707,7 @@ void lightLink(byte led, byte input)
     Serial.print("Link S");
     Serial.print(led+1);
     Serial.print(" with input E");
-    Serial.println(input);
+    Serial.println(input,HEX);
   #endif
   
   lightStartPowerUp(led);
@@ -1008,7 +1008,7 @@ void runningFSM()
       case _ATTACH:
           #ifdef DBG_ENABLE_INFO
             Serial.print("ATTACH input E");
-            Serial.print(duration);
+            Serial.print(duration,HEX);
             Serial.print(" cmds:");
             printCmd(io);
           #endif
@@ -1062,7 +1062,7 @@ void runningFSM()
             Serial.print("WSTOP ");
             Serial.print(duration);
             Serial.print(" input E");
-            Serial.print(io);
+            Serial.print(io,HEX);
             Serial.print(" state: ");
             Serial.println(r);
           #endif

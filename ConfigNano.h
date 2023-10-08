@@ -51,8 +51,8 @@ const byte inputUserPin2 = 17; /* E2B / E2H selon l'état bas ou haut */
 const byte inputUserPin3 = 18; /* E3B / E3H selon l'état bas ou haut */
 const byte inputUserPin4 = 19; /* E4B / E3H selon l'état bas ou haut */
 
-const byte maxInputPins  = 5;
-const byte maxFiltre = 100;
+const byte maxInputPins  = 5; /* nombre d'entrées à gérer en anti-rebond */
+const byte maxFiltre = 192;   /* en millisecondes, le temps que l'entrée doit être stabilisée */
 
 // Entrée pour le seed Generator
 const byte seedPin = 7;
