@@ -51,8 +51,8 @@
 #define E4B     4
 
 // entrées à l'état Haut
-#define ESTARTH 128
-#define E1H     129
-#define E2H     130
-#define E3H     131
-#define E4H     132
+#define ESTARTH 0x80
+#define E1H     0x81
+#define E2H     0x82
+#define E3H     0x83
+#define E4H     0x84
