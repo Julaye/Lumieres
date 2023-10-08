@@ -20,7 +20,7 @@ Les types d'éclairages actuellement supportés sont :
 - gyrophare
 - bougie / brasero
 - feu clignotant qui ne clignote que s’il n’est pas permanent,
-(- Buzzer liée au poste de soudure à l'arc. --> BOF)
+- (Buzzer liée au poste de soudure à l'arc. --> BOF)
 
 Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
