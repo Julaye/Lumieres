@@ -189,30 +189,30 @@ void setup() {
   // pin pour démarrer / stopper la FSM générale
   pinMode(startPin,INPUT_PULLUP);
   inputState[0] = digitalRead(startPin);
-  inputCount[0] = maxFiltre;
+  inputCount[0] = (inputState[0]?maxFiltreH:maxFiltreB);
 
   // 4 entrées utilisateurs
   pinMode(inputUserPin1,INPUT_PULLUP);
   inputState[1] = digitalRead(inputUserPin1);
-  inputCount[1] = maxFiltre;
+  inputCount[1] = (inputState[1]?maxFiltreH:maxFiltreB);
   
   pinMode(inputUserPin2,INPUT_PULLUP);
   inputState[2] = digitalRead(inputUserPin2);
-  inputCount[2] = maxFiltre;
+  inputCount[2] = (inputState[2]?maxFiltreH:maxFiltreB);
   
   pinMode(inputUserPin3,INPUT_PULLUP);
   inputState[3] = digitalRead(inputUserPin3);
-  inputCount[3] = maxFiltre;
+  inputCount[3] = (inputState[3]?maxFiltreH:maxFiltreB);
 
   pinMode(inputUserPin4,INPUT_PULLUP);
   inputState[4] = digitalRead(inputUserPin4);
-  inputCount[4] = maxFiltre;
+  inputCount[4] = (inputState[4]?maxFiltreH:maxFiltreB);
 
   // la germe du générateur aléatoire
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println("Lumieres - version 20231007 - (c) Julie Dumortier - Licence GPL");
+  Serial.println("Lumieres - version 20231008 - (c) Julie Dumortier - Licence GPL");
 
   // initialize la FSM
   #ifdef DBG_ENABLE_DEBUG
@@ -304,7 +304,7 @@ void set(byte led, int value)
   
   switch (outputMode[led]) {
     case MODE_IO: digitalWrite(2+led,HIGH); break;
-    case MODE_PWM: //analogWrite(2+led,value); break;
+    case MODE_PWM:
       if (ledCnf[led]==ETYPE_BUZZER) {
         analogWrite(2+led,PWM_FOR_BUZZER);
       } else {
@@ -389,15 +389,15 @@ bool updateInput(int io)
   if (inputState[io]!=r) {
     if (inputCount[io]==0) {
       // le filtre a fait son job
-      inputState[io] = r;         // garde le nouvel état
-      inputCount[io] = maxFiltre; // relance le filtre
+      inputState[io] = r;                          // garde le nouvel état
+      inputCount[io] = (r?maxFiltreH:maxFiltreB); // relance le filtre
     } else {
       // le filtre doit faire son job
       inputCount[io]--;
     }     
   } else {
     // l'entrée n'a pas changé d'état depuis la dernière mise à jour
-    inputCount[io] = maxFiltre;  // relance le filtre
+    inputCount[io] = (r?maxFiltreH:maxFiltreB); // relance le filtre
   }
 
   #ifdef DBG_ENABLE_VERBOSE
