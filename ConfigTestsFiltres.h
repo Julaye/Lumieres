@@ -9,9 +9,9 @@
 // Affectation des types d'éclairage ou de fonctions à chaque sortie
 const byte ledCnf[] = {
  /* D2 */ ETYPE_STANDARD,   /* S1 (1)  : sortie standard (IO) *
- /* D3 */ ETYPE_FLASH,      /* S2 (2)  : flash (PWM) */
+ /* D3 */ ETYPE_STANDARD,   /* S2 (2)  : sortie standard (PWM) */
  /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) */
- /* D5 */ ETYPE_GYROPHARE,  /* S4 (8)  : gyrophare (PWM) */
+ /* D5 */ ETYPE_STANDARD,   /* S4 (8)  : sortie standard(PWM) */
  /* D6 */ ETYPE_NOTUSED,    /* S5 (16) : not used (PWM) */
  /* D7 */ ETYPE_NOTUSED,    /* S6 (32) : not used (IO) */
  /* D8 */ ETYPE_NOTUSED,    /* S7 (64) : not used (IO) */
