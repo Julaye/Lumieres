@@ -49,10 +49,10 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 
 ### v2023100x
 - Anti-rebond sur les entrées (pour pouvoir utiliser des entrées de rétro-signalisation)
-- Buzzer désactivé car pas terrible
+- Fichier spécifique (ConfigTestsFiltres.h) pour tester l'anti-rebond
 
 ### v2021110x
-- type de sortie Buzzer (liée au poste soudage)
+- type de sortie Buzzer (liée au poste soudage), résultat très bof
 - Revisite le systeme de trace avec info, verbose, debug et error
 - Clarifie l'usage d'une configuration de tests, dans le fichier idoine ConfigTests.h
 
