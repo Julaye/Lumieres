@@ -46,14 +46,14 @@ const byte outputMode[] = {
 // Entrée digital D15 permettant de choisir la séquence 1 ou la séquence 2 (Pull-up)
 const byte seqPin = 15;
 
-// Entrées D12 et D13 pour extraire le numéro d'automatisme, cumulé avec seqPin !
+// Entrées D12 et D20 pour extraire le numéro d'automatisme, cumulés avec seqPin !
 const byte prog0Pin = 12;
-const byte prog1Pin = 13;
+const byte prog1Pin = 20;
 
-// Entrée digital D14 permettant de passer en RUN (1) ou en STOP (0)  (Pull-up)
-const int startPin = 14;       /* ESTARTB/ESTARTH selon l'état bas (STOP) ou haut (RUN) */
+// Entrée digitale D14 permettant de passer en RUN (1) ou en STOP (0)  (Pull-up)
+const byte startPin = 14;       /* ESTARTB/ESTARTH selon l'état bas (STOP) ou haut (RUN) */
 
-// Entrées digitals utilisateur (Pull-Up)
+// Entrées digitales utilisateur (Pull-Up)
 const byte inputUserPin1 = 16; /* E1B / E1H selon l'état bas ou haut */
 const byte inputUserPin2 = 17; /* E2B / E2H selon l'état bas ou haut */
 const byte inputUserPin3 = 18; /* E3B / E3H selon l'état bas ou haut */
@@ -64,5 +64,5 @@ const byte maxInputPins  = 5; /* nombre d'entrées à gérer en anti-rebond */
 const byte maxFiltreH = 8;    /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 1 -> 0 */
 const byte maxFiltreB = 512;  /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 0 -> 1 */
 
-// Entrée pour le seed Generator
-const byte seedPin = 7;
+// Entrée Analogique (A7/D21) pour le seed Generator
+const byte seedPin = 21;

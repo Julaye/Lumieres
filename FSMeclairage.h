@@ -34,7 +34,7 @@ const byte estate_PWRUP     = 2; /* éclairage en allumage --> ON quand la séqu
 const byte estate_ON        = 3; /* éclairage allumé */
 
 // blink transition pour un éclairage
-typedef struct blink {
+typedef struct _blink {
   int duration;
   byte intensity;
 } blink;
