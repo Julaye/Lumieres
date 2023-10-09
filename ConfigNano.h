@@ -46,6 +46,10 @@ const byte outputMode[] = {
 // Entrée digital D15 permettant de choisir la séquence 1 ou la séquence 2 (Pull-up)
 const byte seqPin = 15;
 
+// Entrées D12 et D13 pour extraire le numéro d'automatisme, cumulé avec seqPin !
+const byte prog0Pin = 12;
+const byte prog1Pin = 13;
+
 // Entrée digital D14 permettant de passer en RUN (1) ou en STOP (0)  (Pull-up)
 const int startPin = 14;       /* ESTARTB/ESTARTH selon l'état bas (STOP) ou haut (RUN) */
 

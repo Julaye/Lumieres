@@ -13,14 +13,15 @@
 //
 // Plus d'exemples dans la documention, notamment pour les fonctions les
 // avancées comme le poste de soudure, le flash du photographe, ...
-//
+// =====================================================================
+
 // === Ce fichier est à adapter en fonction de vos automatismes ========
 
 // ---------------------------------------------------------------------
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE SCENE      ---
 
 // Affectation des types d'éclairage ou de fonctions à chaque sortie
-const byte ledCnf[] = {
+const byte myCnf[] = {
  /* D2 */ ETYPE_NEONNEUF,    /* S1 (1)  : bureau administratif (IO) *
  /* D3 */ ETYPE_SOUDURE,     /* S2 (2)  : accueil (PWM) */
  /* D4 */ ETYPE_STANDARD,    /* S3 (4)  : bureau M. CLaude (IO) */
@@ -32,10 +33,6 @@ const byte ledCnf[] = {
  /* D10 */ ETYPE_STANDARD,   /* S9 (256) ou SM2 : bureau Mlle Pélerin (PWM) */
  /* D11 */ ETYPE_GYROPHARE   /* S10 (512) : gyrophare (PWM) */
 };
-
-// Pour la commande d'un servo moteur sur la sortie D9 ou D10 uniquement
-// LIGNE CI-APRÈS À METTRE EN COMMENTAIRE SI VOUS N'UTILISEZ AUCUN SERVO
-//#include <Servo.h>
 
 // Séquence est une liste de couple (sorties, durée d'allumage en secondes, commande)
 // Cf le fichier FSMLumieres.h pour la signification de chaque commande utilisée

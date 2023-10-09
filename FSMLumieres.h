@@ -26,6 +26,9 @@ const byte _MARK   = 77; /* place le marqueur pour le LOOP */
 // Pointeur vers la séquence en cours, une séquence étant une suite de couple (éclairages, durée, commande)
 int* gpSeq;
 
+// Pointeur vers la configuration des E/S
+byte* gpCnf;
+
 // Pointeur vers la mark
 int* gpMarkSeq;
 

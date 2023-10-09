@@ -21,6 +21,7 @@
 //  v20211107 - Better traces + some buzzer testing + SERVO usage impact D9 (S8) & D10 (S9) pins not working with PWM
 //  v20230913 - Ajout d'un filtre anti-rebond sur les entrées (non publié)
 //  v20231008 - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires + Traces
+//  v2023100x - utomatismes précodés et accessibles via une configuration - cf issue https://github.com/Julaye/Lumieres/issues/10
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
@@ -88,20 +89,11 @@ const byte PWM_FOR_BUZZER = 255;
 // informations d'erreurs
 #define DBG_ENABLE_ERROR
 
-// Utilisation d'automatismes de tests (cf FSMLumieres.h)
-#define DBG_ENABLE_TESTS
-
 // ---------------------------------------------------------------------
-// Configuration des deux automatismes (mySeq1 et mySeq2)
+// Configuration des automatismes
 
-#ifdef DBG_ENABLE_TESTS
-// activer un seul fichier en fonction des tests à faire
-//#include "ConfigTests.h"
-#include "ConfigTestsFiltres.h"
-#else
-// la configuration de votre automatisme se trouve dans ce fichier
+#include "ConfigAutomatismes.h"
 #include "ConfigLumieres.h"
-#endif
 
 // ---------------------------------------------------------------------
 // au besoin, structure pour piloter un servo moteur sur D9 ou D10
@@ -116,7 +108,7 @@ Servo gServo;
 
 void initFSM()
 { 
-  byte seq;
+  byte prog;
 
   #ifdef DBG_ENABLE_VERBOSE
     Serial.print("Init FSM ");
@@ -129,11 +121,11 @@ void initFSM()
   }
 
   // récupère la séquence pour le mode RUNNING
-  seq = digitalRead(seqPin);
+  prog = digitalRead(seqPin) + digitalRead(prog0Pin) << 1 +  digitalRead(prog1Pin) << 2;
 
   #ifdef DBG_ENABLE_INFO
-    Serial.print("Séquence : ");
-    Serial.print(seq+1);
+    Serial.print("Numéro Programme : 0x");
+    Serial.print(prog,HEX);
   #endif
   
   #ifdef DBG_ENABLE_DEBUG
@@ -144,15 +136,49 @@ void initFSM()
     #endif
   #endif
 
-  #ifdef DBG_ENABLE_TESTS
-    Serial.println(" - ConfigTests.h");
-  #else
-    #ifdef DBG_ENABLE_INFO
-      Serial.println(" - ConfigLumieres.h");
-    #endif
-  #endif
+  // début de la séquence en fonction du programme
+  switch (prog) {
+    case 0:
+    default:
+      gpSeq = (int*)&Seq1_Prog00;
+      gpCnf = (byte*)&ledCnf_Prog00;
+      break;
 
-  (seq==LOW)?gpSeq=(int*)&mySeq1:gpSeq=(int*)&mySeq2;
+    case 1:
+      gpSeq = (int*)&Seq2_Prog00;
+      gpCnf = (byte*)&ledCnf_Prog00;
+      break;
+
+    case 2:
+      gpSeq = (int*)&Seq1_Prog01;
+      gpCnf = (byte*)&ledCnf_Prog01;
+      break; 
+
+    case 3:
+      gpSeq = (int*)&Seq2_Prog01;
+      gpCnf = (byte*)&ledCnf_Prog01;
+      break; 
+
+    case 4:
+      gpSeq = (int*)&Seq1_Prog10;
+      gpCnf = (byte*)&ledCnf_Prog10;
+      break; 
+
+    case 5:
+      gpSeq = (int*)&Seq2_Prog10;
+      gpCnf = (byte*)&ledCnf_Prog10;
+      break; 
+
+    case 6:
+      gpSeq=(int*)&mySeq1;
+      gpCnf = (byte*)&myCnf;
+      break;
+
+    case 7:
+      gpSeq=(int*)&mySeq2;
+      gpCnf = (byte*)&myCnf;
+      break;
+  }
 
   // mark par défaut sur le début de la séquence
   gpMarkSeq = gpSeq;
@@ -183,8 +209,10 @@ void setup() {
   // Ports digitaux programmables (PWM) : D3, D5, D6, D9, D10 et D11
   for (int i = 0 ; i < maxLights; i++) pinMode(i+2,OUTPUT);
 
-  // pin pour choisir la séquence
+  // pin pour choisir la séquence et le programme
   pinMode(seqPin,INPUT_PULLUP);
+  pinMode(prog0Pin,INPUT_PULLUP);
+  pinMode(prog1Pin,INPUT_PULLUP);
 
   // pin pour démarrer / stopper la FSM générale
   pinMode(startPin,INPUT_PULLUP);
@@ -305,7 +333,7 @@ void set(byte led, int value)
   switch (outputMode[led]) {
     case MODE_IO: digitalWrite(2+led,HIGH); break;
     case MODE_PWM:
-      if (ledCnf[led]==ETYPE_BUZZER) {
+      if (gpCnf[led]==ETYPE_BUZZER) {
         analogWrite(2+led,PWM_FOR_BUZZER);
       } else {
         analogWrite(2+led,value);
@@ -471,7 +499,7 @@ bool linkOn(byte led)
 byte linkOut(byte typeled=ETYPE_BUZZER)
 {
     for (int i=0; i<maxLights; i++) {
-      if (ledCnf[i]==typeled) return i;
+      if (gpCnf[i]==typeled) return i;
     }
     return (byte)-1;
 }
@@ -486,7 +514,7 @@ void lightOff(byte led)
   // la led est-elle liée à une entrée ? */
   if (linkOn(led)) return;
 
-  if (ledCnf[led]==ETYPE_SERVO) {
+  if (gpCnf[led]==ETYPE_SERVO) {
     #ifdef Servo_h    
     gServo.write(0);
     #endif
@@ -521,7 +549,7 @@ void lightStartPowerUp(byte led,byte param=false)
   // si la led est déjà allumée, ne rien faire
   if (gLight[led].stateRunning == estate_ON) return;
 
-  switch (ledCnf[led]) {
+  switch (gpCnf[led]) {
     case ETYPE_STANDARD: 
         gLight[led].stateRunning = estate_ON;
         if (param==0) {
@@ -601,7 +629,7 @@ void lightStartPowerUp(byte led,byte param=false)
           Serial.print("S");
           Serial.print(led+1);
           Serial.print(" NOTUSED or UNKNOWN (ledCnf:");
-          Serial.print(ledCnf[led]);
+          Serial.print(gpCnf[led]);
           Serial.println(") <-- state_OFF");
         #endif
         return;    
@@ -623,7 +651,7 @@ void lightOn(byte led)
     // la led est-elle liée à une entrée ? */
     if (linkOff(led)) return;
 
-    switch (ledCnf[led]) {
+    switch (gpCnf[led]) {
       case ETYPE_STANDARD:
         set(led,gLight[led].param); 
         break;
@@ -639,7 +667,7 @@ void lightOn(byte led)
         break;
     }
     
-    if (ledCnf[led]==ETYPE_NEONVIEUX) {
+    if (gpCnf[led]==ETYPE_NEONVIEUX) {
       // fait un tirage aléatoire et refait un glitch à partir d'une séquence prédéterminée
       // ajuster la valeur random en fonction de la fréquence d'apparition (en ms)
       alea = random(0,10000);
@@ -663,7 +691,7 @@ void lightPowerUp(byte led)
     if (linkOff(led)) return;
 
     #ifdef Servo_h
-    if (ledCnf[led]==ETYPE_SERVO) {
+    if (gpCnf[led]==ETYPE_SERVO) {
       gServo.write(90);
       gLight[led].stateRunning = estate_ON;
       return;
