@@ -26,29 +26,39 @@ const byte LIGHT_FAD4 = PWM_FOR_LED/4;
 const byte LIGHT_FAD8 = PWM_FOR_LED/8;
 const byte LIGHT_OFF = 0;
 
-// Configuration du mode de chaque sortie (Arduino Nano)
-const byte outputMode[] = {
+// mapping sortie logique (0..maxoutputs-1) -> sortie physique
+const byte gDx[] = {
+    /* D2 : S1 */ 2,
+    /* D3 : S2 */ 3,
+    /* D4 : S3 */ 4,
+    /* D5 : S4 */ 5,
+    /* D6 : S5 */ 6,
+    /* D9 : S6 ou SM1 */ 9,
+    /* D10 : S7 ou SM2  */ 10,
+    /* D11 : S8 */ 11
+};
+
+// mode de chaque sortie : IO standard ou PWM
+const byte gMode[] = {
     /* D2 : S1 */ MODE_IO,
     /* D3 : S2 */ MODE_PWM,
     /* D4 : S3 */ MODE_IO,
     /* D5 : S4 */ MODE_PWM,
     /* D6 : S5 */ MODE_PWM,
-    /* D7 : S6 */ MODE_IO,
-    /* D8 : S7 */ MODE_IO,
-    /* D9 : S8 ou SM1 */ MODE_PWM,
-    /* D10 : S9 ou SM2  */ MODE_PWM,
-    /* D11 : S10 */ MODE_PWM,
+    /* D9 : S6 ou SM1 */ MODE_PWM,
+    /* D10 : S7 ou SM2  */ MODE_PWM,
+    /* D11 : S8 */ MODE_PWM
 };
 
 // Nombre maximum d'éclairages dans le tableau précédent
-#define maxLights sizeof(outputMode)/sizeof(byte)
+#define maxOutputs sizeof(gMode)
 
 // Entrée digital D15 permettant de choisir la séquence 1 ou la séquence 2 (Pull-up)
 const byte seqPin = 15;
 
-// Entrées D12 et D20 pour extraire le numéro d'automatisme, cumulés avec seqPin !
-const byte prog0Pin = 12;
-const byte prog1Pin = 20;
+// Entrées D7 et D8 pour extraire le numéro d'automatisme, cumulés avec seqPin !
+const byte prog0Pin = 7;
+const byte prog1Pin = 8;
 
 // Entrée digitale D14 permettant de passer en RUN (1) ou en STOP (0)  (Pull-up)
 const byte startPin = 14;       /* ESTARTB/ESTARTH selon l'état bas (STOP) ou haut (RUN) */

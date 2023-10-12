@@ -39,11 +39,11 @@ typedef struct _blink {
   byte intensity;
 } blink;
 
-// par défaut, un éclairage n'est connecté à aucune entrée
-const int LightNotLinked = 255;
+// par défaut, une sortie n'est connectée à aucune entrée
+const int OutputNotLinked = 255;
 
 // parametres d'un éclairage
-typedef struct {
+typedef struct _paramOutput {
     byte stateRunning; /* état (OFF, STPWRUP, PWRUP ou ON) */
     byte statePwrup;   /* dans l'état PWRUP, mémoriser la transition en cours */
     int stateDelay;   /* delay avant la prochaine transition ON OFF */
@@ -52,7 +52,7 @@ typedef struct {
     byte nextState;   /* état une fois que la table des transitions a été parcourue */
     byte param;
     byte link;        /* si l'éclairage est lié à une entrée */
-} paramLight;
+} paramOutput;
 
-// Pour chaque éclairage
-paramLight gLight[maxLights];
+// Pour chaque sortie
+paramOutput gLight[maxOutputs];

@@ -24,13 +24,13 @@ const byte _LOOP   = 88; /* marqueur de boucle pour redémarrer sur le MARK */
 const byte _MARK   = 77; /* place le marqueur pour le LOOP */
 
 // Pointeur vers la séquence en cours, une séquence étant une suite de couple (éclairages, durée, commande)
-int* gpSeq;
+byte* gpSeq;
 
 // Pointeur vers la configuration des E/S
 byte* gpCnf;
 
 // Pointeur vers la mark
-int* gpMarkSeq;
+byte* gpMarkSeq;
 
 // machine à état des séquences
 const byte START    = 0; /* état initial */
@@ -46,7 +46,7 @@ bool gCurrentStateStartPin;
 // parametres de l'automate
 struct {
     long int duration;  /* durée avant la transition */
-    int leds;           /* leds concernés par la transition */
+    byte leds;          /* leds concernés par la transition */
     byte command;       /* commande associée */
 } gSeq;
 

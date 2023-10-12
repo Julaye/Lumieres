@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------------------
 
 // DEBUT / FIN d'une séquence
-#define DEBUTSEQ(_seq)   const int _seq[] = {
+#define DEBUTSEQ(_seq)   const byte _seq[] = {
 #define FINSEQ(_seq)     }; /* _seq[] */
 
 // Toutes les macros instructions ont la structure suivante :
@@ -39,9 +39,7 @@
 #define S6    32
 #define S7    64
 #define S8    128
-#define S9    256
-#define S10   512
-#define SALL  1023
+#define SALL  255
 
 // entrées à l'état Bas
 #define ESTARTB 0

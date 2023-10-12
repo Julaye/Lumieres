@@ -21,19 +21,21 @@
 //  v20211107 - Better traces + some buzzer testing + SERVO usage impact D9 (S8) & D10 (S9) pins not working with PWM
 //  v20230913 - Ajout d'un filtre anti-rebond sur les entrées (non publié)
 //  v20231008 - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires + Traces
-//  v2023100x - Automatismes précodés et accessibles via une configuration - cf issue https://github.com/Julaye/Lumieres/issues/10 + PROGMEM
+//  v20231009 - Automatismes précodés et accessibles via une configuration - cf issue https://github.com/Julaye/Lumieres/issues/10 + Various
+//  v20231010 - Simplification : PROG0/1 sur D7/D8 et réduction du nombre de sorties de 10 (S1 à S10) à 8 (S1 à S8)
 //
 // Attention
-//  brancher des micro-leds de type 2,9 V sur GND et D2 à D11, protégée par une résistance svp ! 
+//  brancher des micro-leds de type 2,9 V sur GND et les sorties Dx, protégée par une résistance svp ! 
 //  utilisez le calculateur de résistance svp  https://www.digikey.fr/fr/resources/conversion-calculators/conversion-calculator-led-series-resistor
 //  pas plus de 40 mA par sortie, pas plus de 200 mA au total, au risque de griller une sortie et/ou l'Arduino Nano
 //
 //  l'intensité globale est réglable sur les sorties D3, D5, D6, D9, D10 et D11 (cf PWM_FOR_LED dans ConfigNano.h)
 //
-//  le mode de fonctionnement (néon ancien, néon récent, lampe à incadescence standard, ...) est configurable pour chaque sortie (cf ledCnf[])
+//  le mode de fonctionnement (néon ancien, néon récent, lampe à incadescence standard, ...) est configurable pour chaque sortie (cf myLedCnf[])
 //
-//  D14 est une entrée qui permet de choisir au démarrage entre la séquence 1 (cf seq1) et la séquence 2 (cf seq2)
-//  D15 est une entrée qui permet de lancer ou relancer la séquence
+//  D7 et D8 sont des entrées qui permettent de choisir au démarrage un automatisme encodée (Prog00x, Prog01x, Prog10x ou myProg_SeqN)
+//  D14 est une entrée qui permet de choisir au démarrage entre la séquence 1 (cf seq1) et la séquence 2 (cf seq2) de l'automatisme
+//  D15 est une entrée qui permet de lancer ou relancer la séquence (START)
 //
 //  les séquences sont configurables avec une petite logique temporelle
 //  si vous touchez un autre paramètre, c'est à vos risques et périls :) 
@@ -115,18 +117,13 @@ void initFSM()
   #endif
   
   // Initialise l'automate de chaque sortie
-  for (int i = 0 ; i < maxLights; i++) {
+  for (int i = 0 ; i < maxOutputs; i++) {
     gLight[i].stateRunning = estate_OFF;
-    gLight[i].link = LightNotLinked;
+    gLight[i].link = OutputNotLinked;
   }
 
   // récupère la séquence pour le mode RUNNING
-  if (analogRead(prog1Pin)>1023/2) {
-    prog = 4;
-  } else {
-    prog = 0;
-  }
-  prog += (digitalRead(prog0Pin)*2) + digitalRead(seqPin);
+  prog += (digitalRead(prog1Pin)*4) + (digitalRead(prog0Pin)*2) + digitalRead(seqPin);
 
   #ifdef DBG_ENABLE_INFO
     Serial.print(F("Numéro Programme : 0x"));
@@ -153,43 +150,43 @@ void initFSM()
   switch (prog) {
     case 0:
     default:
-      gpSeq = (int*)&Prog000;
+      gpSeq = (byte*)&Prog000;
       gpCnf = (byte*)&ledCnf_Prog00x;
       break;
 
     case 1:
-      gpSeq = (int*)&Prog001;
+      gpSeq = (byte*)&Prog001;
       gpCnf = (byte*)&ledCnf_Prog00x;
       break;
 
     case 2:
-      gpSeq = (int*)&Prog010;
+      gpSeq = (byte*)&Prog010;
       gpCnf = (byte*)&ledCnf_Prog01x;
       break; 
 
     case 3:
-      gpSeq = (int*)&Prog011;
+      gpSeq = (byte*)&Prog011;
       gpCnf = (byte*)&ledCnf_Prog01x;
       break; 
 
     case 4:
-      gpSeq = (int*)&Prog100;
+      gpSeq = (byte*)&Prog100;
       gpCnf = (byte*)&ledCnf_Prog10x;
       break; 
 
     case 5:
-      gpSeq = (int*)&Prog101;
+      gpSeq = (byte*)&Prog101;
       gpCnf = (byte*)&ledCnf_Prog10x;
       break; 
 
     case 6:
-      gpSeq=(int*)&mySeq1;
-      gpCnf = (byte*)&myCnf;
+      gpSeq=(byte*)&myProg_Seq1;
+      gpCnf = (byte*)&myLedCnf;
       break;
 
     case 7:
-      gpSeq=(int*)&mySeq2;
-      gpCnf = (byte*)&myCnf;
+      gpSeq=(byte*)&myProg_Seq2;
+      gpCnf = (byte*)&myLedCnf;
       break;
   }
 
@@ -219,8 +216,10 @@ void setup() {
   // indicateur que la séquence est vivante !
   pinMode(LED_BUILTIN,OUTPUT);
 
-  // Ports digitaux programmables (PWM) : D3, D5, D6, D9, D10 et D11
-  for (int i = 0 ; i < maxLights; i++) pinMode(i+2,OUTPUT);
+  // Ports digitaux programmables (IO/PWM) en sorties
+  for (int i = 0 ; i < maxOutputs; i++) {
+    pinMode(gDx[i],OUTPUT);
+  }
 
   // pin pour choisir la séquence et le programme
   pinMode(seqPin,INPUT_PULLUP);
@@ -283,7 +282,7 @@ void printCmd(int leds,bool timing=false,char cmd=0x00)
 
   Serial.print(" [");
   Serial.print(cmd);
-  for (int i=0; i<maxLights; i++) {
+  for (int i=0; i<maxOutputs; i++) {
     if (leds&pos) Serial.print(" X"); else Serial.print(" _");
     pos = pos << 1 ;
   }
@@ -310,11 +309,15 @@ void unset(byte led)
   #ifdef DBG_ENABLE_DEBUG
     Serial.print("unset led ");
     Serial.print(led);
+    Serial.print("port ");
+    Serial.print(gOutputMode[led].Dx);
+    Serial.print("mode ");
+    Serial.print(gOutputMode[led].mode);
   #endif
 
-  switch (outputMode[led]) {
-    case MODE_IO: digitalWrite(2+led,LOW); break;
-    case MODE_PWM: analogWrite(2+led,0); break;
+  switch (gMode[led]) {
+    case MODE_IO: digitalWrite(gDx[led],LOW); break;
+    case MODE_PWM: analogWrite(gDx[led],0); break;
     default: break;
   }
 
@@ -338,18 +341,22 @@ void set(byte led, int value)
   #ifdef DBG_ENABLE_DEBUG
     Serial.print("set led ");
     Serial.print(led);
+    Serial.print("port ");
+    Serial.print(gDx[led]);
+    Serial.print("mode ");
+    Serial.println(gMode[led]);
   #endif
 
   // indicateur que la séquence est vivante !
   digitalWrite(LED_BUILTIN,LOW);
   
-  switch (outputMode[led]) {
-    case MODE_IO: digitalWrite(2+led,HIGH); break;
+  switch (gMode[led]) {
+    case MODE_IO: digitalWrite(gDx[led],HIGH); break;
     case MODE_PWM:
       if (gpCnf[led]==ETYPE_BUZZER) {
-        analogWrite(2+led,PWM_FOR_BUZZER);
+        analogWrite(gDx[led],PWM_FOR_BUZZER);
       } else {
-        analogWrite(2+led,value);
+        analogWrite(gDx[led],value);
       }
       break;
       
@@ -459,7 +466,7 @@ bool linkOff(byte led)
     bool r;
     
     // la led est-elle liée à une entrée ? */
-    if (gLight[led].link != LightNotLinked) {
+    if (gLight[led].link != OutputNotLinked) {
 
       // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
       io = gLight[led].link&0x7F;
@@ -487,7 +494,7 @@ bool linkOn(byte led)
     bool r;
     
     // la led est-elle liée à une entrée ? */
-    if (gLight[led].link != LightNotLinked) {
+    if (gLight[led].link != OutputNotLinked) {
 
       // récupère le numéro de l'entrée mais aussi l'état bas/haut attendu
       io = gLight[led].link&0x7F;
@@ -511,7 +518,7 @@ bool linkOn(byte led)
 
 byte linkOut(byte typeled=ETYPE_BUZZER)
 {
-    for (int i=0; i<maxLights; i++) {
+    for (int i=0; i<maxOutputs; i++) {
       if (gpCnf[i]==typeled) return i;
     }
     return (byte)-1;
@@ -537,7 +544,7 @@ void lightOff(byte led)
   }
 
   #ifdef DBG_ENABLE_DEBUG
-  if (gLight[led].stateRunning!=estate_OFF) {
+  if (gOutput[led].stateRunning!=estate_OFF) {
     Serial.print("lightOff(S");
     Serial.print(led+1);
     Serial.println(") stateRunning<--OFF");
@@ -757,7 +764,7 @@ void lightLink(byte led, byte input)
 // déconnecte une led avec une sortie
 void lightUnlink(byte led)
 {
-  gLight[led].link = LightNotLinked;
+  gLight[led].link = OutputNotLinked;
 
   #ifdef DBG_ENABLE_VERBOSE
     Serial.print(F("UnLink S"));
@@ -798,7 +805,7 @@ void updateInputs()
 
 void fsmEclairage() 
 {
-  for (int led=0; led<maxLights; led++) {
+  for (int led=0; led<maxOutputs; led++) {
 
     switch (gLight[led].stateRunning) {
       
@@ -837,7 +844,7 @@ void PowerUpLeds(int leds,byte param=false)
 {
   int pos = 1;
           
-  for (int led=0; led<maxLights; led++) {
+  for (int led=0; led<maxOutputs; led++) {
     if (leds&pos) lightStartPowerUp(led,param);
     pos = pos << 1;
   }
@@ -852,7 +859,7 @@ void PowerDownLeds(int leds)
 {
   int pos = 1;
           
-  for (int led=0; led<maxLights; led++) {
+  for (int led=0; led<maxOutputs; led++) {
     if (leds&pos) lightOff(led);
     pos = pos << 1;
   }
@@ -867,7 +874,7 @@ void AttachLeds(int leds,byte input)
 {
   int pos = 1;
           
-  for (int led=0; led<maxLights; led++) {
+  for (int led=0; led<maxOutputs; led++) {
     if (leds&pos) lightLink(led,input);
     pos = pos << 1;
   }
@@ -877,7 +884,7 @@ void DetachLeds(int leds)
 {
   int pos = 1;
           
-  for (int led=0; led<maxLights; led++) {
+  for (int led=0; led<maxOutputs; led++) {
     if (leds&pos) lightUnlink(led);
     pos = pos << 1;
   }
