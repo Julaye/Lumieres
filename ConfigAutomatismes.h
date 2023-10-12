@@ -15,19 +15,9 @@
 
 // === Prog00x ===
 // seq1: chenillard (séquences de tests)
-// seq2: anti-rebond (seq1: ExB -> Sx+1 , seq2: ExH -> Sx+1)
+// seq2: filtre anti-rebond (ExB -> Sx , seq2: ExH -> Sx+4)
 
-const byte ledCnf_Prog00x[] = {
- /* D2 */ ETYPE_STANDARD,   /* S1 (1)  : sortie standard (IO) *
- /* D3 */ ETYPE_STANDARD,   /* S2 (2)  : sortie standard (PWM) */
- /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) */
- /* D5 */ ETYPE_STANDARD,   /* S4 (8)  : sortie standard (PWM) */
- /* D6 */ ETYPE_STANDARD,   /* S5 (16) : sortie standard (PWM) */
- /* D9 */ ETYPE_STANDARD,   /* S6 (32) ou SM1 : sortie standard (PWM)  */
- /* D10 */ ETYPE_STANDARD,  /* S7 (64) ou SM2 : sortie standard (PWM) */
- /* D11 */ ETYPE_STANDARD   /* S8 (128) : sortie standard (PWM) */
-};
-
+/* PROG 0 */
 DEBUTSEQ(Prog000)
   MARK                /* Point de retour */
     1,    1, _SET,
@@ -44,6 +34,7 @@ DEBUTSEQ(Prog000)
   LOOP                 /* Retoune au point de retour */
 FINSEQ(Seq1_Prog000)
 
+/* PROG 1 */
 DEBUTSEQ(Prog001)
   1, E1B, _ATTACH,  
   2, E2B, _ATTACH,  
@@ -57,21 +48,19 @@ DEBUTSEQ(Prog001)
 FINSEQ(Prog001)
 
 // === Prog01x ===
-// seq1: néons neufs (S1,S3), paparazzi (E1B -> S2 flash), gyrophare (E2B -> S4 gyrophare), brasero (E3B -> S5), néon (E4B -> S6, S8), soudure (S7)
-// seq2: néons neufs (S1,S3), paparazzi (E1B -> S2 flash), gyrophare (E2B -> S4 gyrophare), brasero (S5), néon (E4H -> S6, S8), soudure (E3B -> S7)
+// seq1: néons neufs (S1,S3), paparazzi (E1B -> S2 flash), gyrophare (E2B -> S4 gyrophare), brasero (E3B -> S5), néon vieux (E4B -> S6, S8), soudure (S7)
+// seq2: néons neufs (S1,S3), paparazzi (E1B -> S2 flash), gyrophare (E2B -> S4 gyrophare), brasero (S5), néon vieux(E4H -> S6, S8), soudure (E3B -> S7)
 
-const byte ledCnf_Prog01x[] = {
- /* D2 */ ETYPE_NEONNEUF,   /* S1 (1)  : néon neuf (IO) *
- /* D3 */ ETYPE_FLASH,      /* S2 (2)  : flash de photographe (PWM) */
- /* D4 */ ETYPE_NEONNEUF,   /* S3 (4)  : néon neuf (IO) */
- /* D5 */ ETYPE_GYROPHARE,  /* S4 (8)  : gyrophare (PWM) */
- /* D6 */ ETYPE_FIRE,       /* S5 (16) : feu bougie ou brasero (PWM) */
- /* D9 */ ETYPE_NEONVIEUX,  /* S6 (32) ou SM1 : néon vieux avec glitchs (PWM)  */
- /* D10 */ ETYPE_SOUDURE,   /* S7 (64) ou SM2 : poste soudure (PWM) */
- /* D11 */ ETYPE_NEONVIEUX  /* S8 (128) : néon vieux avec glitchs (PWM) */
-};
-
+/* PROG 2 */
 DEBUTSEQ(Prog010)
+  SETMODE(S1,ETYPE_NEONNEUF)
+  SETMODE(S2,ETYPE_FLASH)
+  SETMODE(S3,ETYPE_NEONNEUF)
+  SETMODE(S4,ETYPE_GYROPHARE)
+  SETMODE(S5,ETYPE_FIRE)
+  SETMODE(S6,ETYPE_NEONVIEUX)
+  SETMODE(S7,ETYPE_SOUDURE)
+  SETMODE(S8,ETYPE_NEONVIEUX)
   PERM(S1)
   PERM(S3)
   ATTACH(S4,E2B)
@@ -85,7 +74,16 @@ DEBUTSEQ(Prog010)
   LOOP                /* Retoune au point de retour */
 FINSEQ(Prog010)
 
+/* PROG 3 */
 DEBUTSEQ(Prog011)
+  SETMODE(S1,ETYPE_NEONNEUF)
+  SETMODE(S2,ETYPE_FLASH)
+  SETMODE(S3,ETYPE_NEONNEUF)
+  SETMODE(S4,ETYPE_GYROPHARE)
+  SETMODE(S5,ETYPE_FIRE)
+  SETMODE(S6,ETYPE_NEONVIEUX)
+  SETMODE(S7,ETYPE_SOUDURE)
+  SETMODE(S8,ETYPE_NEONVIEUX)
   PERM(S1)
   PERM(S3)
   ATTACH(S4,E2B)
@@ -95,25 +93,13 @@ DEBUTSEQ(Prog011)
   ATTACH(S7,E3B)
   MARK                /* Point de retour */
     WSTOP(E1B,1)        /* Attend que l'entrée E1 passe à 0, échantillonage à la seconde */
-    /*ALEA(S2,4)          /* lance le flash configuré sur la sortie S2 aléatoirement (0..3) */
-    SET(S2,0)
+    ALEA(S2,4)          /* lance le flash configuré sur la sortie S2 aléatoirement (0..3) */
   LOOP                /* Retoune au point de retour */
 FINSEQ(Prog011)
 
 // === Prog10x ===
 // seq1: signal SNCB (TBD) + 
 // seq2: Passage à niveau (E1/E2 -> servo S6/S7 + clignotement S8)
-
-const byte ledCnf_Prog10x[] = {
- /* D2 */ ETYPE_STANDARD,   /* S1 (1)  : sortie standard (IO) *
- /* D3 */ ETYPE_STANDARD,   /* S2 (2)  : sortie standard (PWM) */
- /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) */
- /* D5 */ ETYPE_STANDARD,   /* S4 (8)  : sortie standard (PWM) */
- /* D6 */ ETYPE_STANDARD,   /* S5 (16) : sortie standard (PWM) */
- /* D9 */ ETYPE_SERVO,      /* S6 (32) ou SM1 : servo moteur de la barrière (PWM)  */
- /* D10 */ ETYPE_SERVO,     /* S7 (64) ou SM2 : servo moteur de la barrière (PWM) */
- /* D11 */ ETYPE_CLIGNOTANT /* S8 (128) : feu clignotant (PWM) */
-};
 
 /* PROG 4 */
 DEBUTSEQ(Prog100)
@@ -123,6 +109,9 @@ FINSEQ(Prog100)
 
 /* PROG 5 */
 DEBUTSEQ(Prog101)
+  SETMODE(S6,ETYPE_SERVO)       /* S6 (32) ou SM1 : servo moteur de la barrière (PWM)  */
+  SETMODE(S7,ETYPE_SERVO)       /* S7 (64) ou SM2 : servo moteur de la barrière (PWM) */
+  SETMODE(S8,ETYPE_CLIGNOTANT)  /* S8 (128) : feu clignotant (PWM) */
   MARK                /* Point de retour */
     WSTOP(E1B,1)       /* attend que E1 passe à 0 -> détection convoi en amont */
     SET(S8,1)          /* lance le feu clignotant */

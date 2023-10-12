@@ -28,7 +28,8 @@
 #define DETACH(IO)            IO,0,_DETACH
 #define END                   0,0,_END,
 #define MARK                  0,0,_MARK,
-#define LOOP                  0,0,_LOOP,          
+#define LOOP                  0,0,_LOOP,
+#define SETMODE(IO,MODE)      IO,MODE,_SETMODE,          
 
 // Il est aussi utile de définir les sorties et les entrées avec des noms explicites
 #define S1    1

@@ -18,7 +18,8 @@ const byte _WAIT    = 4; /* pause d'une durée définie, ne touche à aucun écl
 const byte _WSTOP   = 5; /* pause d'une durée indéfinie, ne touche à aucun éclairage, attends que l'entrée startPin passe à l'état LOW */
 const byte _PWM     = 6; /* envoie le signal sur la sortie si compatible : D3, D5, D6, D9, D10 et D11 */
 const byte _ATTACH  = 7; /* attache sortie(s) et entrée et gère les éclairages selon l'état de cette entrée */
-const byte _DETACH  = 8; /* suppripe le lien existant entre éclairages et l'état d'une entrée */
+const byte _DETACH  = 8; /* supprime le lien existant entre éclairages et l'état d'une entrée */
+const byte _SETMODE = 9; /* change le mode de configuration d'une sortie - cf ETYPE_xxx */
 const byte _END    = 99; /* marqueur de fin de séquence */
 const byte _LOOP   = 88; /* marqueur de boucle pour redémarrer sur le MARK */
 const byte _MARK   = 77; /* place le marqueur pour le LOOP */
@@ -26,8 +27,17 @@ const byte _MARK   = 77; /* place le marqueur pour le LOOP */
 // Pointeur vers la séquence en cours, une séquence étant une suite de couple (éclairages, durée, commande)
 byte* gpSeq;
 
-// Pointeur vers la configuration des E/S
-byte* gpCnf;
+// Configuration des E/S (valeurs par défaut)
+byte gCnf[maxOutputs] = {
+ /* D2 */ ETYPE_STANDARD,   /* S1 (1)  : sortie standard (IO) *
+ /* D3 */ ETYPE_STANDARD,   /* S2 (2)  : sortie standard (PWM) */
+ /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) */
+ /* D5 */ ETYPE_STANDARD,   /* S4 (8)  : sortie standard (PWM) */
+ /* D6 */ ETYPE_STANDARD,   /* S5 (16) : sortie standard (PWM) */
+ /* D9 */ ETYPE_STANDARD,   /* S6 (32) ou SM1 : sortie standard (PWM)  */
+ /* D10 */ ETYPE_STANDARD,  /* S7 (64) ou SM2 : sortie standard (PWM) */
+ /* D11 */ ETYPE_STANDARD   /* S8 (128) : sortie standard (PWM) */
+};
 
 // Pointeur vers la mark
 byte* gpMarkSeq;

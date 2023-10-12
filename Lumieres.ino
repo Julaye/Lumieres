@@ -23,6 +23,7 @@
 //  v20231008 - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires + Traces
 //  v20231009 - Automatismes précodés et accessibles via une configuration - cf issue https://github.com/Julaye/Lumieres/issues/10 + Various
 //  v20231010 - Simplification : PROG0/1 sur D7/D8 et réduction du nombre de sorties de 10 (S1 à S10) à 8 (S1 à S8)
+//  v20231012 - Ajoute la commande SETMODE pour modifier la configuration d'une sortie directement dans la séquence d'un automatisme
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et les sorties Dx, protégée par une résistance svp ! 
@@ -151,42 +152,34 @@ void initFSM()
     case 0:
     default:
       gpSeq = (byte*)&Prog000;
-      gpCnf = (byte*)&ledCnf_Prog00x;
       break;
 
     case 1:
       gpSeq = (byte*)&Prog001;
-      gpCnf = (byte*)&ledCnf_Prog00x;
       break;
 
     case 2:
       gpSeq = (byte*)&Prog010;
-      gpCnf = (byte*)&ledCnf_Prog01x;
       break; 
 
     case 3:
       gpSeq = (byte*)&Prog011;
-      gpCnf = (byte*)&ledCnf_Prog01x;
       break; 
 
     case 4:
       gpSeq = (byte*)&Prog100;
-      gpCnf = (byte*)&ledCnf_Prog10x;
       break; 
 
     case 5:
       gpSeq = (byte*)&Prog101;
-      gpCnf = (byte*)&ledCnf_Prog10x;
       break; 
 
     case 6:
       gpSeq=(byte*)&myProg_Seq1;
-      gpCnf = (byte*)&myLedCnf;
       break;
 
     case 7:
       gpSeq=(byte*)&myProg_Seq2;
-      gpCnf = (byte*)&myLedCnf;
       break;
   }
 
@@ -219,6 +212,7 @@ void setup() {
   // Ports digitaux programmables (IO/PWM) en sorties
   for (int i = 0 ; i < maxOutputs; i++) {
     pinMode(gDx[i],OUTPUT);
+    gCnf[i] = ETYPE_STANDARD;
   }
 
   // pin pour choisir la séquence et le programme
@@ -353,7 +347,7 @@ void set(byte led, int value)
   switch (gMode[led]) {
     case MODE_IO: digitalWrite(gDx[led],HIGH); break;
     case MODE_PWM:
-      if (gpCnf[led]==ETYPE_BUZZER) {
+      if (gCnf[led]==ETYPE_BUZZER) {
         analogWrite(gDx[led],PWM_FOR_BUZZER);
       } else {
         analogWrite(gDx[led],value);
@@ -519,7 +513,7 @@ bool linkOn(byte led)
 byte linkOut(byte typeled=ETYPE_BUZZER)
 {
     for (int i=0; i<maxOutputs; i++) {
-      if (gpCnf[i]==typeled) return i;
+      if (gCnf[i]==typeled) return i;
     }
     return (byte)-1;
 }
@@ -534,7 +528,7 @@ void lightOff(byte led)
   // la led est-elle liée à une entrée ? */
   if (linkOn(led)) return;
 
-  if (gpCnf[led]==ETYPE_SERVO) {
+  if (gCnf[led]==ETYPE_SERVO) {
     #ifdef Servo_h    
     gServo.write(0);
     #endif
@@ -569,7 +563,7 @@ void lightStartPowerUp(byte led,byte param=false)
   // si la led est déjà allumée, ne rien faire
   if (gLight[led].stateRunning == estate_ON) return;
 
-  switch (gpCnf[led]) {
+  switch (gCnf[led]) {
     case ETYPE_STANDARD: 
         gLight[led].stateRunning = estate_ON;
         if (param==0) {
@@ -649,7 +643,7 @@ void lightStartPowerUp(byte led,byte param=false)
           Serial.print(F("S"));
           Serial.print(led+1);
           Serial.print(F(" NOTUSED or UNKNOWN (ledCnf:"));
-          Serial.print(gpCnf[led]);
+          Serial.print(gCnf[led]);
           Serial.println(F(") <-- state_OFF"));
         #endif
         return;    
@@ -671,7 +665,7 @@ void lightOn(byte led)
     // la led est-elle liée à une entrée ? */
     if (linkOff(led)) return;
 
-    switch (gpCnf[led]) {
+    switch (gCnf[led]) {
       case ETYPE_STANDARD:
         set(led,gLight[led].param); 
         break;
@@ -687,7 +681,7 @@ void lightOn(byte led)
         break;
     }
     
-    if (gpCnf[led]==ETYPE_NEONVIEUX) {
+    if (gCnf[led]==ETYPE_NEONVIEUX) {
       // fait un tirage aléatoire et refait un glitch à partir d'une séquence prédéterminée
       // ajuster la valeur random en fonction de la fréquence d'apparition (en ms)
       alea = random(0,10000);
@@ -711,7 +705,7 @@ void lightPowerUp(byte led)
     if (linkOff(led)) return;
 
     #ifdef Servo_h
-    if (gpCnf[led]==ETYPE_SERVO) {
+    if (gCnf[led]==ETYPE_SERVO) {
       gServo.write(90);
       gLight[led].stateRunning = estate_ON;
       return;
@@ -862,6 +856,18 @@ void PowerDownLeds(int leds)
   for (int led=0; led<maxOutputs; led++) {
     if (leds&pos) lightOff(led);
     pos = pos << 1;
+  }
+}
+
+// ---------------------------------------------------------------------
+// SetMode
+// Fixe la configuration d'une sortie / led
+// ---------------------------------------------------------------------
+
+void SetMode(byte io,byte config)
+{
+  if (io<maxOutputs) {
+    gCnf[io] = config;
   }
 }
 
@@ -1077,6 +1083,17 @@ void runningFSM()
 
           // prévoir la future extinction 
           gSeq.leds |= ledsoff;
+          break;
+
+      case _SETMODE:
+          #ifdef DBG_ENABLE_INFO
+            Serial.print(F("SETMODE type "));
+            Serial.print(duration);
+            Serial.print(F(" cmds:"));
+            printCmd(io);
+          #endif
+
+          SetMode(io,duration);
           break;
 
       case _WAIT:
