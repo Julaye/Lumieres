@@ -49,10 +49,11 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 
 ### v2023101x
 - Propose quelques automatismes pré-programmés (ConfigAutomatismes.h) en plus d'un automatisme programmable (ConfigLumieres.h)
-- Les entrées D7, D8 et D15 permettent de choisir l'automatisme à lancer au démarrage de l'automate
+- Les entrées D7 (P0), D8 (P1) et D15 (SEQ) permettent de choisir l'automatisme à lancer au démarrage de l'automate
 - Corrige un problème sur le seedPin (A7/D21) pour le germe du générateur aléatoire
 - Réduit l'empreinte mémoire sur la SRAM
 - Réduit le nombre de sorties utilisables à 8
+- Ajoute la commande SETMODE pour modifier la configuration d'une sortie directement dans la séquence d'un automatisme
 
 ### v20231008
 - Anti-rebond sur les entrées (pour pouvoir utiliser des entrées de rétro-signalisation)
