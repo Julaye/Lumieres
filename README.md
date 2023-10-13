@@ -53,7 +53,10 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 - Corrige un problème sur le seedPin (A7/D21) pour le germe du générateur aléatoire
 - Réduit l'empreinte mémoire sur la SRAM
 - Réduit le nombre de sorties utilisables à 8
-- Ajoute la commande SETMODE pour modifier la configuration d'une sortie directement dans la séquence d'un automatisme
+- Ajoute la commande SETMODE pour modifier la configuration de sorties directement dans la séquence d'un automatisme
+- Support de deux servos moteurs sur les sorties D9 et D10
+- Rend l'automate compatible avec la *platine "Obourg" Rétro v3*
+- Revisite complétement la documentation de l'automate
 
 ### v20231008
 - Anti-rebond sur les entrées (pour pouvoir utiliser des entrées de rétro-signalisation)
