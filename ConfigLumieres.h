@@ -16,27 +16,37 @@
 // =====================================================================
 
 // === Ce fichier est à adapter en fonction de vos automatismes ========
+// === L'exemple fournit en standard concerne l'animation des lampes ===
+// === d'une fosse d'inspection ... ====================================
+//
+// En voici les spécifications :
+// 1. fosse normalement éteinte sauf si forçage par entrée digital (M83 - bouton vert - au commun==GND)
+// 2. une locomotive passe sans s’arrêter, la fosse reste éteinte sauf si le forçage est en cours
+// 3. une locomotive stationne, au bout d’un temps programmable, la fosse s’allume
+// 4. la fosse allumée s’éteint au bout d’un certain temps programmable, économie d’énergie oblige
+// 5. une locomotive repart, la fosse allumée s’éteint au bout d’un temps programmable
+// 6. entrée digital pour un forçage éteint même si des locomotives stationnent (M83 - bouton rouge - au commun==GND)
 
 // ---------------------------------------------------------------------
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE SCENE      ---
 
-// Séquence est une liste de couple (sorties, durée d'allumage en secondes, commande)
-// Cf le fichier FSMLumieres.h pour la signification de chaque commande utilisée
-#define Lampe1  S1
-#define Lampe2  S2
-
 /* Prog 6 (Séquence 1) : */
 DEBUTSEQ(myProg_Seq1)
-  SET(Lampe1,10)    
-  SET(Lampe2,10)
-  STANDBY(Lampe2,10) /* la miss reste dans son bureau un certain temps (1 à 10 minutes) */
+  SETMODE(S2,ETYPE_STANDARD)  /* relai pour allumer les lampes */
+  
+  ATTACH(E2B,S2)    /* force l'allumage sur un lien */
+  ATTACH(E3H,S2)    /* force l'extinction sur un autre lien */
+
+  WSTOP(E1B,10)     /* loco avérée pendant 10 secondes */
+  UNTIL(S2,2)       /* allume S2 pendant 2 minutes */
+  WSTOP(E1H,10)     /* loco s'en va, attend 10 secondes */
+  UNSET(S2)         /* au cas où S2 soit encore allumé */
+
   END                /* fin de la séquence, tout est éteint */
 FINSEQ(mySeq1)
 
 /* Prog 7 (Séquence 2) : */
 DEBUTSEQ(myProg_Seq2)
-  SET(Lampe1,10)    
-  ALEA(Lampe2,4)     /* La Miss n'est pas toujours présente la nuit ! */
   END                /* fin de la séquence */
 FINSEQ(mySeq2)
 

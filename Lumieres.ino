@@ -88,7 +88,7 @@ const byte PWM_FOR_BUZZER = 255;
 #define DBG_ENABLE_INFO
 
 // Information de mise au point de vos automatismes
-//#define DBG_ENABLE_VERBOSE
+#define DBG_ENABLE_VERBOSE
 
 // Information de mise au point de l'automate
 //#define DBG_ENABLE_DEBUG
@@ -564,12 +564,12 @@ void lightOff(byte led)
 // param est à true si l'allumage va être permanent
 void lightStartPowerUp(byte led,byte param=false)
 {
-    byte buz;
+  byte buz;
  
-    #ifdef DBG_ENABLE_DEBUG
-      Serial.print("lightStartPowerUp S");
-      Serial.println(led+1);
-    #endif
+  #ifdef DBG_ENABLE_DEBUG
+    Serial.print("lightStartPowerUp S");
+    Serial.println(led+1);
+  #endif
 
   // si la led est déjà allumée, ne rien faire
   if (gLight[led].stateRunning == estate_ON) return;
@@ -664,6 +664,7 @@ void lightStartPowerUp(byte led,byte param=false)
   // prépare la séquence
   gLight[led].statePwrup = 0;
   gLight[led].stateDelay = 0;
+  gLight[led].duration = 0;
 }
 
 // allume les lumières
@@ -817,6 +818,10 @@ void updateInputs()
 
 void fsmEclairage() 
 {
+  // gère les until
+  PowerDownLedsUntil();
+
+  // gère les séquences en cours
   for (int led=0; led<maxOutputs; led++) {
 
     switch (gLight[led].stateRunning) {
@@ -862,6 +867,26 @@ void PowerUpLeds(int leds,byte param=false)
   }
 }
 
+void PowerUpLedsUntil(int leds,long int duration,byte param=false)
+{
+  int pos = 1;
+          
+  for (int led=0; led<maxOutputs; led++) {
+    if (leds&pos) {
+      lightStartPowerUp(led,param);
+      gLight[led].duration = millis() + (60L*1000L*duration);
+ 
+      #ifdef DBG_ENABLE_VERBOSE
+        Serial.print(F("Until S"));
+        Serial.print(led+1);
+        Serial.print(F(" with duration "));
+        Serial.println(gLight[led].duration);
+      #endif
+     }
+    pos = pos << 1;
+  }
+}
+
 // ---------------------------------------------------------------------
 // PowerDownLeds
 // Met en off les leds qui ont besoin de l'être
@@ -877,6 +902,26 @@ void PowerDownLeds(int leds)
   }
 }
 
+void PowerDownLedsUntil()
+{
+  int pos = 1;
+          
+  for (int led=0; led<maxOutputs; led++) {
+    if (gLight[led].duration>0) {
+      if (gLight[led].duration<millis()) {
+        gLight[led].duration = 0;
+        lightOff(led);
+        
+        #ifdef DBG_ENABLE_VERBOSE
+          Serial.print(F("Until S"));
+          Serial.print(led+1);
+          Serial.println(F(" ended"));
+        #endif
+      }
+    }
+    pos = pos << 1;
+  }
+}
 // ---------------------------------------------------------------------
 // SetMode
 // Fixe la configuration des sorties qui ont besoin de l'être
@@ -1111,6 +1156,17 @@ void runningFSM()
           
           PowerUpLeds(io);
           PowerDownLeds(ledsoff&~io);
+          break;
+
+      case _UNTIL:
+          #ifdef DBG_ENABLE_INFO
+            Serial.print(F("UNTIL "));
+            Serial.print(duration);
+            Serial.print(F("min cmd: "));
+            printCmd(io);
+          #endif
+
+          PowerUpLedsUntil(io,duration);
           break;
 
       case _ATTACH:

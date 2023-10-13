@@ -52,6 +52,7 @@ typedef struct _paramOutput {
     byte nextState;   /* état une fois que la table des transitions a été parcourue */
     byte param;
     byte link;        /* si l'éclairage est lié à une entrée */
+    long int duration;
 } paramOutput;
 
 // Pour chaque sortie

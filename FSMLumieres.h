@@ -20,6 +20,7 @@ const byte _PWM     = 6; /* envoie le signal sur la sortie si compatible : D3, D
 const byte _ATTACH  = 7; /* attache sortie(s) et entrée et gère les éclairages selon l'état de cette entrée */
 const byte _DETACH  = 8; /* supprime le lien existant entre éclairages et l'état d'une entrée */
 const byte _SETMODE = 9; /* change le mode de configuration d'une sortie - cf ETYPE_xxx */
+const byte _UNTIL  = 10; /* lance les éclairages pendant la durée définie */
 const byte _END    = 99; /* marqueur de fin de séquence */
 const byte _LOOP   = 88; /* marqueur de boucle pour redémarrer sur le MARK */
 const byte _MARK   = 77; /* place le marqueur pour le LOOP */

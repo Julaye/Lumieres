@@ -25,7 +25,8 @@
 #define WSTOP(IO,TIME)        IO,TIME,_WSTOP,
 #define PWM(IO,DUTY)          IO,DUTY,_PWM,
 #define ATTACH(IO,IN)         IO,IN,_ATTACH,
-#define DETACH(IO)            IO,0,_DETACH
+#define DETACH(IO)            IO,0,_DETACH,
+#define UNTIL(IO,TIME)        IO,TIME,_UNTIL,
 #define END                   0,0,_END,
 #define MARK                  0,0,_MARK,
 #define LOOP                  0,0,_LOOP,
