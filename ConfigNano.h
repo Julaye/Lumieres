@@ -38,6 +38,10 @@ const byte gDx[] = {
     /* D11 : S8 */ 11
 };
 
+// index des servo moteurs dans la table des sorties physiques
+#define Index_SM1 5
+#define Index_SM2 6
+
 // mode de chaque sortie : IO standard ou PWM
 const byte gMode[] = {
     /* D2 : S1 */ MODE_IO,

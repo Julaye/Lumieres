@@ -74,6 +74,9 @@ const byte PWM_FOR_BUZZER = 255;
 // Ce fichier concerne la machine à état fini pour gérer le batiment, la scène, ...
 #include "FSMLumieres.h"
 
+// === Pour la commande d'un servo moteur sur la sortie D9 ou D10 uniquement ===
+#include <Servo.h>
+
 // ---------------------------------------------------------------------
 //
 // Système de mise au point
@@ -102,9 +105,7 @@ const byte PWM_FOR_BUZZER = 255;
 // ---------------------------------------------------------------------
 // au besoin, structure pour piloter un servo moteur sur D9 ou D10
 
-#ifdef Servo_h
-Servo gServo;
-#endif
+Servo gServo[2];
 
 // ---------------------------------------------------------------------
 // --- initFSM()
@@ -530,9 +531,18 @@ void lightOff(byte led)
   if (linkOn(led)) return;
 
   if (gCnf[led]==ETYPE_SERVO) {
-    #ifdef Servo_h    
-    gServo.write(0);
-    #endif
+    switch (led) {
+      case Index_SM1:
+          gServo[0].write(0);
+          break;
+
+      case Index_SM2:
+          gServo[1].write(0);
+          break;
+
+      default:
+        break;
+    }
   } else {
     // eteint la led
     unset(led);
@@ -626,7 +636,6 @@ void lightStartPowerUp(byte led,byte param=false)
         gLight[led].nextState = estate_PWRUP;
         break;
 
-    #ifdef Servo_h
     case ETYPE_SERVO:
         #ifdef DBG_ENABLE_DEBUG
           Serial.print("Attach Servo to S");
@@ -634,7 +643,6 @@ void lightStartPowerUp(byte led,byte param=false)
         #endif
         //gServo.attach(2+led);
         break;
-    #endif
     
     case ETYPE_NOTUSED:
     default:
@@ -705,13 +713,22 @@ void lightPowerUp(byte led)
     // la led est-elle liée à une entrée ? */
     if (linkOff(led)) return;
 
-    #ifdef Servo_h
     if (gCnf[led]==ETYPE_SERVO) {
-      gServo.write(90);
+      switch (led) {
+        case Index_SM1:
+            gServo[0].write(90);
+            break;
+
+        case Index_SM2:
+            gServo[1].write(90);
+            break;
+
+        default:
+          break;
+      }
       gLight[led].stateRunning = estate_ON;
       return;
     }
-    #endif
     
     // vérifier si le delai de la transition est écoulé
     if (gLight[led].stateDelay<=0) 
@@ -871,7 +888,38 @@ void SetModeLeds(int leds,byte config)
           
   for (int led=0; led<maxOutputs; led++) {
     if (leds&pos) {
-      gCnf[led] = config;     
+      // Stocke la nouvelle configuration de la sortie
+      gCnf[led] = config;
+
+      // attache ou détache l'éventuel objet Servo au besoin 
+      if (config==ETYPE_SERVO) {
+        switch (led) {
+          case Index_SM1:
+            gServo[0].attach(gDx[led]);
+            break;
+
+          case Index_SM2:
+            gServo[1].attach(gDx[led]);
+            break;
+
+          default:
+            break;
+        }
+      } else {
+        switch (led) {
+          case Index_SM1:
+            if (gServo[0].attached()) gServo[0].detach();
+            break;
+
+          case Index_SM2:
+            if (gServo[1].attached()) gServo[1].detach();
+            break;
+
+          default:
+            break;
+        }
+
+      } 
     }
     pos = pos << 1;
   }

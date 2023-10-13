@@ -10,9 +10,6 @@
 // 11 : automatisme utilisateur (programmé dans ConfigLumieres.h) (mode par défaut)
 // ================================================================
 
-// === Pour la commande d'un servo moteur sur la sortie D9 ou D10 uniquement ===
-#include <Servo.h>
-
 // === Prog00x ===
 // seq1: chenillard (séquences de tests)
 // seq2: filtre anti-rebond (ExB -> Sx , seq2: ExH -> Sx+4)
