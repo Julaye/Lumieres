@@ -861,13 +861,18 @@ void PowerDownLeds(int leds)
 
 // ---------------------------------------------------------------------
 // SetMode
-// Fixe la configuration d'une sortie / led
+// Fixe la configuration des sorties qui ont besoin de l'être
 // ---------------------------------------------------------------------
 
-void SetMode(byte io,byte config)
+void SetModeLeds(int leds,byte config)
 {
-  if (io<maxOutputs) {
-    gCnf[io] = config;
+  int pos = 1;
+          
+  for (int led=0; led<maxOutputs; led++) {
+    if (leds&pos) {
+      gCnf[led] = config;     
+    }
+    pos = pos << 1;
   }
 }
 
@@ -1093,7 +1098,7 @@ void runningFSM()
             printCmd(io);
           #endif
 
-          SetMode(io,duration);
+          SetModeLeds(io,duration);
           break;
 
       case _WAIT:

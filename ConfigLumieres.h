@@ -20,24 +20,12 @@
 // ---------------------------------------------------------------------
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE SCENE      ---
 
-// Affectation des types d'éclairage ou de fonctions à chaque sortie
-const byte myLedCnf[] = {
-  /* D2 */ ETYPE_STANDARD,   /* S1 (1)  : sortie standard (IO) *
- /* D3 */ ETYPE_STANDARD,   /* S2 (2)  : sortie standard (PWM) */
- /* D4 */ ETYPE_STANDARD,   /* S3 (4)  : sortie standard (IO) */
- /* D5 */ ETYPE_STANDARD,   /* S4 (8)  : sortie standard (PWM) */
- /* D6 */ ETYPE_STANDARD,   /* S5 (16) : sortie standard (PWM) */
- /* D9 */ ETYPE_STANDARD,   /* S6 (32) ou SM1 : sortie standard (PWM)  */
- /* D10 */ ETYPE_STANDARD,  /* S7 (64) ou SM2 : sortie standard (PWM) */
- /* D11 */ ETYPE_STANDARD   /* S8 (128) : sortie standard (PWM) */
-};
-
 // Séquence est une liste de couple (sorties, durée d'allumage en secondes, commande)
 // Cf le fichier FSMLumieres.h pour la signification de chaque commande utilisée
 #define Lampe1  S1
 #define Lampe2  S2
 
-/* Séquence 1 : */
+/* Prog 6 (Séquence 1) : */
 DEBUTSEQ(myProg_Seq1)
   SET(Lampe1,10)    
   SET(Lampe2,10)
@@ -45,7 +33,7 @@ DEBUTSEQ(myProg_Seq1)
   END                /* fin de la séquence, tout est éteint */
 FINSEQ(mySeq1)
 
-/* Séquence 2 : le dépot fonctionne de nuit */
+/* Prog 7 (Séquence 2) : */
 DEBUTSEQ(myProg_Seq2)
   SET(Lampe1,10)    
   ALEA(Lampe2,4)     /* La Miss n'est pas toujours présente la nuit ! */
