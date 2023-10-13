@@ -23,7 +23,8 @@
 //  v20231008 - Publication sur un Pull Request Git Julaye-filter (isoler le développement) + Corrige des typos + Maj commentaires + Traces
 //  v20231009 - Automatismes précodés et accessibles via une configuration - cf issue https://github.com/Julaye/Lumieres/issues/10 + Various
 //  v20231010 - Simplification : PROG0/1 sur D7/D8 et réduction du nombre de sorties de 10 (S1 à S10) à 8 (S1 à S8)
-//  v20231012 - Ajoute la commande SETMODE pour modifier la configuration d'une sortie directement dans la séquence d'un automatisme
+//  v20231012 - Ajoute la commande SETMODE pour modifier la configuration des sorties directement dans la séquence d'un automatisme
+//  v20231013 - Quelques typos
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et les sorties Dx, protégée par une résistance svp ! 
@@ -127,7 +128,7 @@ void initFSM()
   prog += (digitalRead(prog1Pin)*4) + (digitalRead(prog0Pin)*2) + digitalRead(seqPin);
 
   #ifdef DBG_ENABLE_INFO
-    Serial.print(F("Numéro Programme : 0x"));
+    Serial.print(F("Programme : 0x"));
     Serial.print(prog,HEX);
   #endif
   
@@ -246,7 +247,7 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println(F("Lumieres - version 20231009 - (c) Julie Dumortier - Licence GPL"));
+  Serial.println(F("Lumieres - version 20231013 - (c) Julie Dumortier - Licence GPL"));
 
   // initialize la FSM
   #ifdef DBG_ENABLE_DEBUG
@@ -997,7 +998,7 @@ void runningFSM()
 
       case _PWM:
           #ifdef DBG_ENABLE_INFO
-            Serial.print(F("PWN duration:"));
+            Serial.print(F("PWM duration:"));
             Serial.print(duration);
             Serial.print(F(" s cmd:"));
             printCmd(io);

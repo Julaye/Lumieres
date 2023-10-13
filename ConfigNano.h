@@ -75,4 +75,4 @@ const byte maxFiltreH = 8;    /* en millisecondes, le temps que l'entrée doit �
 const byte maxFiltreB = 512;  /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 0 -> 1 */
 
 // Entrée Analogique (A7/D21) pour le seed Generator
-const byte seedPin = 21;
+const byte seedPin = A7;
