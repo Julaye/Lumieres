@@ -8,7 +8,7 @@ EN : Management of a building, a scene or a set of lighting with an Arduino Nano
 
 Objectif du projet : Le programme Lumières est une tentative pour proposer aux adeptes du modélisme un automate de gestion des éclairages d’un bâtiment, d'une scène, ou plus généralement d’un ensemble d’éclairages, qui soit facile d’accès pour un non initié à la programmation d’un Arduino, et fortement paramétrable pour couvrir les besoins les plus courants.
 
-L'utilisateur adapte le fichier *ConfigLumieres.h* selon ses besoins et il obtient un automate opérationnel, sans écrire une seule ligne de code, seulement des données dans le fichier susmentionné. C'est une approche NO CODE - LOW CODE pour surfer sur le buzz des outils de programmation actuels.
+L'utilisateur choisi un automatisme parmis ceux qui sont proposés ou bien adapte le fichier *ConfigLumieres.h* selon ses besoins et il obtient un automate opérationnel personnalisé, sans écrire une seule ligne de code, seulement des données dans le fichier susmentionné. C'est une approche NO CODE - LOW CODE pour surfer sur le buzz des outils de programmation actuels.
 
 Les types d'éclairages actuellement supportés sont : 
 - lampe standard (allumé ou éteint)
@@ -22,6 +22,15 @@ Les types d'éclairages actuellement supportés sont :
 - feu clignotant qui ne clignote que s’il n’est pas permanent,
 - (Buzzer liée au poste de soudure à l'arc. --> BOF)
 
+Les automatismes actuellement pré-programmés sont :
+- chenillard
+- recopie des entrées sur les sorties, avec anti-rebond
+- éclairages batiments 1 et 2 avec différentes possibilités
+- signaux SNCB (TBD)
+- Passage à niveau
+- éclairages d'une fosse d'inspection
+- éclairages d'une fosse d'inspection dans un batiment
+
 Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
 Licence : Le logiciel est sous licence GPL et peut être librement utilisé et modifié dans le cadre de notre passion de modélisme, vos éventuelles modifications doivent être reversées à la communauté.
@@ -30,11 +39,11 @@ Langage de programmation : C for Arduino Nano
 
 Langue du projet : Français / French
 
-Version pre-release supportée : v2023100x
+Version beta relaase supportée : v20231014
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
-La documentation proposée présente aussi dans son chapitre 9 de nombreux exemples d'automatismes qui sont faciles à réaliser avec cet automate :
+La documentation proposée présente aussi dans son chapitre 10 de nombreux exemples d'automatismes qui sont faciles à réaliser avec cet automate :
 - Photographe paparazzi dont le flash se déclenche au passage d'un train
 - Gestion de la séquence d'éclairage d'une fosse d'inspection au stationnement d'une locomotive
 - Animation d'un poste de soudure en présence d'une locomotive dans l'atelier
@@ -47,7 +56,21 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 
 ## Notes de version
 
-### v2023100x
+### v2023101x - modifications majeures -> beta
+- Propose quelques automatismes pré-programmés (ConfigAutomatismes.h) en plus de deux automatismes programmables (ConfigLumieres.h)
+- Les entrées D7 (P0), D8 (P1) et D15 (SEQ) permettent de choisir l'automatisme à lancer au démarrage de l'automate
+- Corrige un problème sur le seedPin (A7/D21) pour le germe du générateur aléatoire
+- Réduit l'empreinte mémoire sur la SRAM
+- Réduit le nombre de sorties utilisables à 8
+- Ajoute la commande SETMODE pour modifier la configuration de sorties directement dans la séquence d'un automatisme
+- Ajoute la commande UNTIL pour allumer des sorties pendant x minutes sans bloquer la séquence
+- Ajoute trois entrées calculées (E1 or E2, E1 and E2, E1 xor E2)
+- La commande WSTOP échantillonne à la seconde l'entrée spécifiée pendant la durée mentionnée en paramètre
+- Support de deux servos moteurs sur les sorties D9 et D10
+- Rend l'automate compatible avec la *platine "Obourg" Rétro v3*
+- Revisite complétement la documentation de l'automate
+
+### v20231008
 - Anti-rebond sur les entrées (pour pouvoir utiliser des entrées de rétro-signalisation)
 - Fichier spécifique (ConfigTestsFiltres.h) pour tester l'anti-rebond
 

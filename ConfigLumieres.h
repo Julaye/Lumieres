@@ -13,89 +13,73 @@
 //
 // Plus d'exemples dans la documention, notamment pour les fonctions les
 // avancées comme le poste de soudure, le flash du photographe, ...
-//
+// =====================================================================
+
 // === Ce fichier est à adapter en fonction de vos automatismes ========
 
 // ---------------------------------------------------------------------
 // --- ICI COMMENCE LA CONFIGURATION EN FONCTION DE VOTRE SCENE      ---
 
-// Affectation des types d'éclairage ou de fonctions à chaque sortie
-const byte ledCnf[] = {
- /* D2 */ ETYPE_NEONNEUF,    /* S1 (1)  : bureau administratif (IO) *
- /* D3 */ ETYPE_SOUDURE,     /* S2 (2)  : accueil (PWM) */
- /* D4 */ ETYPE_STANDARD,    /* S3 (4)  : bureau M. CLaude (IO) */
- /* D5 */ ETYPE_GYROPHARE,   /* S4 (8)  : couloir haut (PWM) */
- /* D6 */ ETYPE_FIRE,        /* S5 (16) : escalier (PWM) */
- /* D7 */ ETYPE_NEONNEUF,    /* S6 (32) : couloir bas (IO) */
- /* D8 */ ETYPE_NEONNEUF,    /* S7 (64) : bureau M. Gaston (IO) */
- /* D9 */ ETYPE_NEONVIEUX,   /* S8 (128) ou SM1 : bureau secrétaire (PWM) */
- /* D10 */ ETYPE_STANDARD,   /* S9 (256) ou SM2 : bureau Mlle Pélerin (PWM) */
- /* D11 */ ETYPE_GYROPHARE   /* S10 (512) : gyrophare (PWM) */
-};
+// Prog 6 : Lumières d'une fosse d'inspection
+// En voici les spécifications :
+// 1. fosse normalement éteinte sauf si forçage par entrée digital (M83 - bouton vert - au commun==GND)
+// 2. une locomotive passe sans s’arrêter, la fosse reste éteinte sauf si le forçage est en cours
+// 3. une locomotive stationne, au bout d’un temps programmable, la fosse s’allume
+// 4. la fosse allumée s’éteint au bout d’un certain temps programmable, économie d’énergie oblige
+// 5. une locomotive repart, la fosse allumée s’éteint au bout d’un temps programmable
+// 6. entrée digital pour un forçage éteint même si des locomotives stationnent (M83 - bouton rouge - au commun==GND)
 
-// Pour la commande d'un servo moteur sur la sortie D9 ou D10 uniquement
-// LIGNE CI-APRÈS À METTRE EN COMMENTAIRE SI VOUS N'UTILISEZ AUCUN SERVO
-//#include <Servo.h>
+DEBUTSEQ(myProg_Seq1)
+  SETMODE(S2,ETYPE_STANDARD)  /* relai pour allumer les lampes */
+  
+  ATTACH(E2B,S2)    /* force l'allumage sur un lien */
+  ATTACH(E3B,S2)    /* force l'extinction sur un autre lien */
 
-// Séquence est une liste de couple (sorties, durée d'allumage en secondes, commande)
-// Cf le fichier FSMLumieres.h pour la signification de chaque commande utilisée
-
-// Je peux me définir des symboles pour faciliter la lecture de mon automatisme
-#define Administratif S1
-#define Accueil       S2
-#define Claude        S3
-#define CouloirEtage  S4
-#define Escalier      S5
-#define CouloirRDC    S6
-#define Gaston        S7
-#define Secretaire    S8
-#define LaMiss        S9
-#define Incendie      S10
-
-/* Séquence 1 : Miss Pélerin passe (avec ou sans M. Gaston) */
-DEBUTSEQ(mySeq1)
-  ATTACH(Incendie,E1B)  /* déclenche le gyrophare si l'entrée 1 passe à l'état bas */
-  SET(Accueil,10)    /* allume l'accueil (néon neuf) pendant 10 secondes */
-  SET(Accueil+CouloirRDC,10) /* laisse l'accueil allumé et allume le couloir RDC (néon neuf) pendant 10 secondes */
-  SET(Escalier+CouloirRDC,10) /* éteint l'accueil et allume le couloir RDC (néon neuf) et l'escalier (néon ancien) pendant 10 secondes */
-  SET(Escalier+CouloirEtage,10) /* ETC :)  */
-  SET(CouloirEtage+LaMiss,10)
-  ALEA(Gaston,2)    /* parfois M. gaston accompagne la miss (50% de chance) */  
-  ALEA(Secretaire,2)    /* parfois la secrétaire accompagne la miss (50% chance) */
-  STANDBY(LaMiss,10) /* la miss reste dans son bureau un certain temps (1 à 10 minutes) */
-  SET(CouloirEtage+LaMiss,2)
-  SET(CouloirEtage,10)
-  SET(CouloirEtage+Escalier,10)
-  SET(Escalier+CouloirRDC,10)
-  SET(CouloirRDC+Accueil,10)
-  SET(Accueil,10)   /* éteint le couloir du RDC, allume l'accueil pendant 10 secondes */
-  END          /* fin de la séquence, tout est éteint */
+  0,5,_MARK,
+    WSTOP(E1B,10)     /* loco avérée pendant 10 secondes */
+    UNTIL(S2,4)       /* allume S2 pendant 4 minutes */
+    WSTOP(E1H,10)     /* loco s'en va, attend 10 secondes */
+    UNSET(S2)         /* au cas où S2 soit encore allumé */
+  LOOP
 FINSEQ(mySeq1)
 
-/* Séquence 2 : le dépot fonctionne de nuit */
-DEBUTSEQ(mySeq2)
-  ATTACH(Incendie,E1B) /* déclenche le gyrophare si l'entrée 1 passe à l'état bas */
-  SET(Accueil,10)
-  PERM(Accueil)
-  SET(CouloirRDC,10)  
-  SET(CouloirRDC+Administratif,2)
-  SET(Administratif,2)
-  PERM(Administratif)
-  SET(Escalier,10)
-  SET(Escalier+CouloirEtage,10)
-  PERM(Secretaire)
-  ALEA(LaMiss,4)      /* La Miss n'est pas toujours présente la nuit ! */
-  ALEA(Gaston,2)  
-  ALEA(Claude,2)
-  WSTOP(ESTARTB,3)
-  UNSET(LaMiss+Secretaire+Gaston+Claude) /* éteint les bureaux de l'étage */
-  SET(Escalier,10)
-  UNSET(CouloirEtage+Administratif)  /* eteint couloir haut et administratif */
-  WAIT(10)
-  UNSET(CouloirRDC)   /* éteint couloir bas */
-  WAIT(10)
-  UNSET(Accueil)     /* éteint accueil */
-  END                /* fin de la séquence */
+// Prog 7 : Automatismes d'un atelier
+
+DEBUTSEQ(myProg_Seq2)
+  SETMODE(S1,ETYPE_NEONNEUF) /* S1 : lampe de l’atelier (IO) */
+  SETMODE(S2,ETYPE_NEONNEUF) /* S2 : néon de l’atelier (PWM) */
+
+  SETMODE(S4,ETYPE_SOUDURE)  /* S4 : poste de soudure de l’atelier (PWM) */
+
+  SETMODE(S6,ETYPE_BUZZER)    /* S6 : buzzer du poste de soudure (PWM) */
+  SETMODE(S7,ETYPE_SERVO)     /* S7 : servomoteur de la porte (PWM) */
+  SETMODE(S8,ETYPE_GYROPHARE) /* S8 : gyrophare de la porte (PWM) */
+
+  PERM(S1+S2) /* l’atelier se met au travail au démarrage de l’Arduino … */
+
+  0,5,_MARK,  /* point de retour de l’automatisme (et timeout à 5 minutes) */  
+    WSTOP(E1orE2B,1)  /* attend la détection d’une locomotive sur la voie 1 ou voie 2 */
+    UNTIL(S8,2)   /* lance le gyrophare configuré sur la sortie D11 pour deux minutes */
+    WAIT(5)       /* attend 5 secondes */
+    UNTIL(S7,2)   /* envoie 90° sur la sortie D10 du servomoteur pour deux minutes */
+    WSTOP(E1andE2H,1)  /* attend la non détection de la locomotive sur la voie 1 ou voie 2 */
+    UNSET(S7)     /* envoie 0° sur la sortie D10 du servomoteur */
+    WAIT(5)       /* attend 5 secondes */
+    UNSET(S8)     /* arrête le gyrophare configuré sur la sortie D11 */
+
+    WSTOP(E2B,1)  /* attend la détection d’une locomotive sur la voie 2 */
+
+    0,5,_MARK,    /* point de retour de l’automatisme (et timeout à 5 minutes) */ 
+      WAIT(5)       /* 5 secondes */
+      SET(S4+S6,15) /* un peu de soudure sur la locomotive qui vient de rentrer pendant 15 secondes */
+      UNTIL(S7,2)   /* envoie 90° sur la sortie D10 du servomoteur pour deux minutes */
+    
+    WSTOP(E2H,1)  /* attend la non détection de la locomotive sur la voie 2 */
+    UNSET(S4+S6)  /* arrête le poste soudure, la loco est partie ! */
+    UNSET(S7)     /* envoie 0° sur la sortie D10 du servomoteur */
+    WAIT(5)       /* 5 secondes */
+    
+  RESET    /* boucle attendre la locomotive suivante */
 FINSEQ(mySeq2)
 
 // --- ICI SE TERMINE LA CONFIGURATION EN FONCTION DE VOTRE SCENE    ---
