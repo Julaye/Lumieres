@@ -43,7 +43,7 @@ Version beta relaase supportée : v20231014
 
 Documentation : https://docs.google.com/document/d/1chZwYiFPMKlHFLLsJ7WHy0EHtaLVpebEK52L9wi9J30/
 
-La documentation proposée présente aussi dans son chapitre 9 de nombreux exemples d'automatismes qui sont faciles à réaliser avec cet automate :
+La documentation proposée présente aussi dans son chapitre 10 de nombreux exemples d'automatismes qui sont faciles à réaliser avec cet automate :
 - Photographe paparazzi dont le flash se déclenche au passage d'un train
 - Gestion de la séquence d'éclairage d'une fosse d'inspection au stationnement d'une locomotive
 - Animation d'un poste de soudure en présence d'une locomotive dans l'atelier
