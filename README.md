@@ -48,13 +48,15 @@ Forum 3rails : https://forum.3rails.fr/t/une-debutante-dans-le-decor-ep13-que-la
 ## Notes de version
 
 ### v2023101x - modifications majeures -> beta
-- Propose quelques automatismes pré-programmés (ConfigAutomatismes.h) en plus d'un automatisme programmable (ConfigLumieres.h)
+- Propose quelques automatismes pré-programmés (ConfigAutomatismes.h) en plus de deux automatismes programmables (ConfigLumieres.h)
 - Les entrées D7 (P0), D8 (P1) et D15 (SEQ) permettent de choisir l'automatisme à lancer au démarrage de l'automate
 - Corrige un problème sur le seedPin (A7/D21) pour le germe du générateur aléatoire
 - Réduit l'empreinte mémoire sur la SRAM
 - Réduit le nombre de sorties utilisables à 8
 - Ajoute la commande SETMODE pour modifier la configuration de sorties directement dans la séquence d'un automatisme
 - Ajoute la commande UNTIL pour allumer des sorties pendant x minutes sans bloquer la séquence
+- Ajoute trois entrées calculées (E1 or E2, E1 and E2, E1 xor E2)
+- La commande WSTOP échantillonne à la seconde l'entrée spécifiée pendant la durée mentionnée en paramètre
 - Support de deux servos moteurs sur les sorties D9 et D10
 - Rend l'automate compatible avec la *platine "Obourg" Rétro v3*
 - Revisite complétement la documentation de l'automate
