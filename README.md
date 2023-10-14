@@ -8,7 +8,7 @@ EN : Management of a building, a scene or a set of lighting with an Arduino Nano
 
 Objectif du projet : Le programme Lumières est une tentative pour proposer aux adeptes du modélisme un automate de gestion des éclairages d’un bâtiment, d'une scène, ou plus généralement d’un ensemble d’éclairages, qui soit facile d’accès pour un non initié à la programmation d’un Arduino, et fortement paramétrable pour couvrir les besoins les plus courants.
 
-L'utilisateur adapte le fichier *ConfigLumieres.h* selon ses besoins et il obtient un automate opérationnel, sans écrire une seule ligne de code, seulement des données dans le fichier susmentionné. C'est une approche NO CODE - LOW CODE pour surfer sur le buzz des outils de programmation actuels.
+L'utilisateur choisi un automatisme parmis ceux qui sont proposés ou bien adapte le fichier *ConfigLumieres.h* selon ses besoins et il obtient un automate opérationnel personnalisé, sans écrire une seule ligne de code, seulement des données dans le fichier susmentionné. C'est une approche NO CODE - LOW CODE pour surfer sur le buzz des outils de programmation actuels.
 
 Les types d'éclairages actuellement supportés sont : 
 - lampe standard (allumé ou éteint)
@@ -21,6 +21,15 @@ Les types d'éclairages actuellement supportés sont :
 - bougie / brasero
 - feu clignotant qui ne clignote que s’il n’est pas permanent,
 - (Buzzer liée au poste de soudure à l'arc. --> BOF)
+
+Les automatismes actuellement pré-programmés sont :
+- chenillard
+- recopie des entrées sur les sorties, avec anti-rebond
+- éclairages batiments 1 et 2 avec différentes possibilités
+- signaux SNCB (TBD)
+- Passage à niveau
+- éclairages d'une fosse d'inspection
+- éclairages d'une fosse d'inspection dans un batiment
 
 Sur les sorties PWM (D3,D5,D6,D9,D10 et D11), l'automate gère la variation d'intensité lumineuse pour plus de réalisme.
 
