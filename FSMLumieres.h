@@ -24,9 +24,14 @@ const byte _UNTIL  = 10; /* lance les éclairages pendant la durée définie */
 const byte _END    = 99; /* marqueur de fin de séquence */
 const byte _LOOP   = 88; /* marqueur de boucle pour redémarrer sur le MARK */
 const byte _MARK   = 77; /* place le marqueur pour le LOOP */
+const byte _RESET  = 66; /* redémarre la FSM */
 
 // Pointeur vers la séquence en cours, une séquence étant une suite de couple (éclairages, durée, commande)
 byte* gpSeq;
+
+// Timeout général sur MARK et sur WSTOP
+long int gMARKTimeout;
+long int gWSTOPTimeout;
 
 // Configuration des E/S (valeurs par défaut)
 byte gCnf[maxOutputs] = {
@@ -62,5 +67,5 @@ struct {
 } gSeq;
 
 // anti rebond des entrées
-byte inputState[maxInputPins];
+byte inputState[maxInputs];
 byte inputCount[maxInputPins];

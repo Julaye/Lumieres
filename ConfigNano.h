@@ -75,6 +75,8 @@ const byte inputUserPin4 = 19; /* E4B / E3H selon l'état bas ou haut */
 
 // Anti-rebond optimisé pour la rétro-signalisation Marklin C / Platine Obourg v2
 const byte maxInputPins  = 5; /* nombre d'entrées à gérer en anti-rebond */
+const byte maxInputs = maxInputPins+3;
+
 const byte maxFiltreH = 8;    /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 1 -> 0 */
 const byte maxFiltreB = 512;  /* en millisecondes, le temps que l'entrée doit être stabilisée avant de passer de 0 -> 1 */
 

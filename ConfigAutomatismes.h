@@ -84,10 +84,10 @@ DEBUTSEQ(Prog011)
   ATTACH(S6,E4H)
   PERM(S8)
   ATTACH(S7,E3B)
-  MARK                /* Point de retour */
-    WSTOP(E1B,1)        /* Attend que l'entrée E1 passe à 0, échantillonage à la seconde */
-    ALEA(S2,4)          /* lance le flash configuré sur la sortie S2 aléatoirement (0..3) */
-  LOOP                /* Retoune au point de retour */
+  MARK          /* Point de retour */
+    WSTOP(E1B,2)  /* Attend que l'entrée E1 passe à 0 pendant 2 secondes */
+    ALEA(S2,4)    /* lance le flash configuré sur la sortie S2 aléatoirement (0..3) */
+  LOOP          /* Retoune au point de retour */
 FINSEQ(Prog011)
 
 // === Prog10x ===

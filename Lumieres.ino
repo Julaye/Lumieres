@@ -1,7 +1,7 @@
 // Lumieres
-// Exemple pour le forum 3rails / Julie Dumortier / Licence GPL
+// Automate pour le forum 3rails / Julie Dumortier / Licence GPL
 // 
-// La gestion d'un batiment, d'une scène, d'un ensemble d'éclairages et automatismes avec un petit Arduino Nano
+// La gestion d'un batiment, d'une scène, d'un ensemble d'éclairages et autres automatismes avec un petit Arduino Nano
 //
 // Historique des versions (résumé)
 //  v20211027 - première implémentation, mise au point, mode debug
@@ -24,7 +24,8 @@
 //  v20231009 - Automatismes précodés et accessibles via une configuration - cf issue https://github.com/Julaye/Lumieres/issues/10 + Various
 //  v20231010 - Simplification : PROG0/1 sur D7/D8 et réduction du nombre de sorties de 10 (S1 à S10) à 8 (S1 à S8)
 //  v20231012 - Ajoute la commande SETMODE pour modifier la configuration des sorties directement dans la séquence d'un automatisme
-//  v20231013 - Quelques typos
+//  v20231013 - Quelques typos + ajout de la commande UNTIL + paramètre duration sur la commande MARK
+//  v20231014 - Ajout de la commande RESET + Ajout des entrées calculées + Commande WSTOP teste l'entrée pendant la durée mentionnée
 //
 // Attention
 //  brancher des micro-leds de type 2,9 V sur GND et les sorties Dx, protégée par une résistance svp ! 
@@ -88,7 +89,7 @@ const byte PWM_FOR_BUZZER = 255;
 #define DBG_ENABLE_INFO
 
 // Information de mise au point de vos automatismes
-#define DBG_ENABLE_VERBOSE
+//#define DBG_ENABLE_VERBOSE
 
 // Information de mise au point de l'automate
 //#define DBG_ENABLE_DEBUG
@@ -111,19 +112,9 @@ Servo gServo[2];
 // --- initFSM()
 // ---------------------------------------------------------------------
 
-void initFSM()
-{ 
+void resetFSM()
+{
   byte prog;
-
-  #ifdef DBG_ENABLE_VERBOSE
-    Serial.print(F("Init FSM "));
-  #endif
-  
-  // Initialise l'automate de chaque sortie
-  for (int i = 0 ; i < maxOutputs; i++) {
-    gLight[i].stateRunning = estate_OFF;
-    gLight[i].link = OutputNotLinked;
-  }
 
   // récupère la séquence pour le mode RUNNING
   prog += (digitalRead(prog1Pin)*4) + (digitalRead(prog0Pin)*2) + digitalRead(seqPin);
@@ -187,6 +178,21 @@ void initFSM()
 
   // mark par défaut sur le début de la séquence
   gpMarkSeq = gpSeq;
+}
+
+void initFSM()
+{ 
+  #ifdef DBG_ENABLE_VERBOSE
+    Serial.print(F("Init FSM "));
+  #endif
+  
+  // Initialise l'automate de chaque sortie
+  for (int i = 0 ; i < maxOutputs; i++) {
+    gLight[i].stateRunning = estate_OFF;
+    gLight[i].link = OutputNotLinked;
+  }
+
+  resetFSM();
 
   // initialise les différents états
   gSeqState = START;
@@ -195,6 +201,8 @@ void initFSM()
   gSeq.duration = millis();
   gSeq.leds = 0;
   gSeq.command = _SET;
+  gMARKTimeout = 0;
+  gWSTOPTimeout = 0;
 }
 
 // ---------------------------------------------------------------------
@@ -248,10 +256,10 @@ void setup() {
   randomSeed(analogRead(seedPin));
 
   // Annonce la version
-  Serial.println(F("Lumieres - version 20231013 - (c) Julie Dumortier - Licence GPL"));
+  Serial.println(F("Lumieres - version 20231014 - (c) Julie Dumortier - Licence GPL"));
 
   // initialize la FSM
-  #ifdef DBG_ENABLE_DEBUG
+  #ifdef DBG_ENABLE_VERBOSE
     Serial.print("HW RESET -> INIT seed:");
     Serial.println(random());
   #endif
@@ -403,15 +411,15 @@ void displayInputs()
   int pos = 1;
 
   mapInputs = 0;
-  for (int i=0 ; i < maxInputPins; i++) {
-    mapInputs += (inputState[i] << i);
+  for (byte i=0 ; i < maxInputs; i++) {
+    mapInputs |= (inputState[i] << i);
   }
 
   if (mapInputs!=prevInputs) {
     prevInputs = mapInputs;
   
     Serial.print(" INPUTS[");
-    for (int i=0 ; i < maxInputPins; i++) {
+    for (int i=0 ; i < maxInputs; i++) {
       if (mapInputs&pos) Serial.print(" X"); else Serial.print(" _");
       pos = pos << 1 ;
     }
@@ -443,10 +451,6 @@ bool updateInput(int io)
     // l'entrée n'a pas changé d'état depuis la dernière mise à jour
     inputCount[io] = (r?maxFiltreH:maxFiltreB); // relance le filtre
   }
-
-  #ifdef DBG_ENABLE_VERBOSE
-    displayInputs();
-  #endif
 
   // retourne l'état filtré
   return inputState[io];
@@ -789,11 +793,22 @@ void lightUnlink(byte led)
 
 // ---------------------------------------------------------------------
 // updateInputs()
+//
+// met à jour les entrées physiques
+// puis met à jour les entrées calculées
 // ---------------------------------------------------------------------
 
 void updateInputs()
 {
-  for (int io=0; io<maxInputPins; io++) updateInput(io);
+  for (byte io=0; io<maxInputPins; io++) updateInput(io);
+
+  inputState[5] = inputState[1] & inputState[2];
+  inputState[6] = inputState[1] | inputState[2];
+  inputState[7] = inputState[1] ^ inputState[2];
+
+  #ifdef DBG_ENABLE_VERBOSE
+    displayInputs();
+  #endif
 }
 
 // ---------------------------------------------------------------------
@@ -1013,8 +1028,20 @@ void runningFSM()
 
   // vérifie si le compteur de rappel est écoulé
   if (gSeq.duration<millis()) {
+    // vérifie si timeout sur MARK
+    if (gMARKTimeout>0) {
+      if (gMARKTimeout<millis()) {
+        #ifdef DBG_ENABLE_INFO
+          Serial.println(F("MARK TIMEOUT -> LOOP"));
+        #endif
+        gMARKTimeout = 0;
+        gpSeq = gpMarkSeq;
+        PowerDownLeds(gSeq.leds);
+      }
+    }
+    
     // il est écoulé
-    #ifdef DBG_ENABLE_INFO
+    #ifdef DBG_ENABLE_VERBOSE
       Serial.print(F("NEXT "));
     #endif
     
@@ -1043,10 +1070,13 @@ void runningFSM()
 
       case _MARK: /* place la mark pour un futur LOOP */
           #ifdef DBG_ENABLE_INFO
-            Serial.println(F("MARK"));
+            Serial.print(F("MARK timeout "));
+            Serial.print(duration);
+            Serial.println(F(" min"));
           #endif
           
           gpMarkSeq = gpSeq-3;
+          if (duration>0) gMARKTimeout = millis() + (duration * 60L * 1000L);
         
           PowerDownLeds(ledsoff&~io);
           break;
@@ -1139,6 +1169,20 @@ void runningFSM()
           PowerDownLeds(io | ledsoff);
           break;
             
+      case _RESET:
+          gSeq.duration = millis() + duration*1000;
+ 
+          #ifdef DBG_ENABLE_INFO
+            Serial.print(F("RESET "));
+            Serial.print(duration);
+            Serial.print(F("s cmd: "));
+            printCmd(io);
+          #endif
+          
+          PowerDownLeds(io | ledsoff);
+          resetFSM();
+          break;
+            
       case _SET:
           if (duration<=0) {
             gSeq.duration = millis() + 500; /* demi seconde */
@@ -1223,11 +1267,17 @@ void runningFSM()
           break;
  
       case _WSTOP:
-          if (duration<=0) {
-            gSeq.duration = millis() + 500; /* demi seconde */
-          } else {
-            gSeq.duration = millis() + duration*1000;
+          if (gWSTOPTimeout==0) {
+            // début du WSTOP -> fixe la durée totale
+            if (duration<=0) {
+              gWSTOPTimeout = millis() + 500; /* demi seconde */
+            } else {
+              gWSTOPTimeout = millis() + duration*1000;
+            }
           }
+
+          // frequence de test des entrées : la seconde !
+          gSeq.duration = millis() + 1000;
 
           // test la condition d'arret du STOP
           r = (inputState[io&0x7F] == ((io&0x80)?LOW:HIGH));
@@ -1239,7 +1289,10 @@ void runningFSM()
             Serial.print(F(" input E"));
             Serial.print(io,HEX);
             Serial.print(F(" state: "));
-            Serial.println(r);
+            Serial.print(r);
+            Serial.print(F(" Remaining: "));
+            long int diff = gWSTOPTimeout-millis();
+            Serial.println(diff>0?diff:0);
           #endif
 
           // prévoir les extinction en même temps que le stop en cours
@@ -1248,6 +1301,12 @@ void runningFSM()
           // il faut encore attendre
           if (r) {
             gpSeq -=3; /* reste sur la commande en cours */
+            gWSTOPTimeout = 0; /* relance l'attente */
+          } else {
+            if (gWSTOPTimeout >= millis()) {
+              /* on a pas assez attendu -> reste sur la commande en cours */
+              gpSeq -=3; /* reste sur la commande en cours */
+            }
           }
           break;
           
